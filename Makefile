@@ -1,7 +1,7 @@
 .PHONY: clean run
 
 cgploss.so: yosys/yosys
-	yosys/yosys-config --exec --cxx --cxxflags --ldflags -o cgploss.so -shared src/main.cpp -I yosys/ --ldlibs
+	yosys/yosys-config --exec --cxx --cxxflags --ldflags -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs
 
 yosys/yosys:
 	cd yosys && make
