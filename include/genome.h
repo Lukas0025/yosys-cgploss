@@ -17,7 +17,8 @@ namespace genome {
 		GATE_AOI3,
 		GATE_OAI3,
 		GATE_AOI4,
-		GATE_OAI4
+		GATE_OAI4,
+		GATE_MUX
 	};
 
 	typedef struct {
