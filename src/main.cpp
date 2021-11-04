@@ -43,11 +43,19 @@ struct cgploss : public Pass {
 
 				auto celll = rtlil2genome_cell(cell, &mapper);
 
-				log("cell name is %s inputs is %d, %d\n", cell->type.c_str(), celll.genome.I1, celll.genome.I2);
+				log("cell name is %s id is %d inputs is %d, %d\n", cell->type.c_str(), celll.id, celll.genome.I1, celll.genome.I2);
 
 				//main_genome->add_cell(convert::rtlil2genome_cell(cell));
 
 				mod->remove(cell); //delete cell in reprezentation
+			}
+
+			for (auto output : mapper.out) {
+				log("OUTPUT %d\n", output);
+			}
+
+			for (auto input : mapper.in) {
+				log("INPUT %d\n", input);
 			}
 
 		}

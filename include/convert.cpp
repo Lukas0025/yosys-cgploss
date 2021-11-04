@@ -1,13 +1,29 @@
 typedef struct mapper {
 	std::map<Yosys::RTLIL::SigBit, int> signal_map;
+    std::map<int, Yosys::RTLIL::SigBit> reverse_signal_map;
+    std::set<int>                       in, out;
 	int                                 last = 0;
 } mapper_t;
 
-int map_signal(RTLIL::SigSpec bit, mapper_t *mapper) {
+int map_signal(RTLIL::SigSpec bit, mapper_t *mapper, bool output = false) {
 	if (mapper->signal_map.count(bit) == 0) {
+
 		mapper->signal_map[bit] = mapper->last;
-		mapper->last++;
-	}
+        mapper->reverse_signal_map[mapper->last] = bit;
+		
+        if (output) {
+            mapper->out.insert(mapper->last);
+        } else {
+            mapper->in.insert(mapper->last);
+        }
+
+        mapper->last++;
+	} else {
+        if (output)
+            mapper->in.erase(mapper->signal_map[bit]);
+        else 
+            mapper->out.erase(mapper->signal_map[bit]);
+    }
 
 	return mapper->signal_map[bit];
 }
@@ -49,23 +65,22 @@ genome::gates_types_t rtlil2genome_type(RTLIL::Cell* cell) {
 		log_abort();
 }
 
+int rtlil2genome_out(RTLIL::Cell* cell, mapper_t *mapper) {
+    auto sig_y = cell->getPort(ID::Y);
+    return map_signal(sig_y, mapper, true);
+}
+
 genome::cell_genome_t rtlil2genome_genome(RTLIL::Cell* cell, mapper_t *mapper) {
 	genome::cell_genome_t genome;
 
     if (cell->type.in(ID($_BUF_), ID($_NOT_))) {
 		auto sig_a = cell->getPort(ID::A);
-        auto sig_y = cell->getPort(ID::Y);
-        
-        map_signal(sig_y, mapper); //me
         
         genome.I1 = map_signal(sig_a, mapper);
 
 	} else if (cell->type.in(ID($_AND_), ID($_NAND_), ID($_OR_), ID($_NOR_), ID($_XOR_), ID($_XNOR_), ID($_ANDNOT_), ID($_ORNOT_))) {
 		auto sig_a = cell->getPort(ID::A);
 		auto sig_b = cell->getPort(ID::B);
-		auto sig_y = cell->getPort(ID::Y);
-
-        map_signal(sig_y, mapper); //me
 
 		genome.I1 = map_signal(sig_a, mapper);
 		genome.I2 = map_signal(sig_b, mapper);
@@ -74,9 +89,6 @@ genome::cell_genome_t rtlil2genome_genome(RTLIL::Cell* cell, mapper_t *mapper) {
 		auto sig_a = cell->getPort(ID::A);
 		auto sig_b = cell->getPort(ID::B);
 		auto sig_s = cell->getPort(ID::S);
-		auto sig_y = cell->getPort(ID::Y);
-
-        map_signal(sig_y, mapper); //me
 
         genome.I1 = map_signal(sig_a, mapper);
         genome.I2 = map_signal(sig_b, mapper);
@@ -86,9 +98,6 @@ genome::cell_genome_t rtlil2genome_genome(RTLIL::Cell* cell, mapper_t *mapper) {
 		auto sig_a = cell->getPort(ID::A);
 		auto sig_b = cell->getPort(ID::B);
 		auto sig_c = cell->getPort(ID::C);
-		auto sig_y = cell->getPort(ID::Y);
-
-        map_signal(sig_y, mapper); //me
 
 		genome.I1 = map_signal(sig_a, mapper);
 		genome.I2 = map_signal(sig_b, mapper);
@@ -99,9 +108,6 @@ genome::cell_genome_t rtlil2genome_genome(RTLIL::Cell* cell, mapper_t *mapper) {
 		auto sig_b = cell->getPort(ID::B);
 		auto sig_c = cell->getPort(ID::C);
 		auto sig_d = cell->getPort(ID::D);
-		auto sig_y = cell->getPort(ID::Y);
-
-        map_signal(sig_y, mapper); //me
 
 		genome.I1 = map_signal(sig_a, mapper);
 		genome.I2 = map_signal(sig_b, mapper);
@@ -116,6 +122,7 @@ genome::cell_t rtlil2genome_cell(RTLIL::Cell* rtlil_cell, mapper_t *mapper) {
 	genome::cell_t genome_cell;
 
 	genome_cell.type   = rtlil2genome_type(rtlil_cell);
+    genome_cell.id     = rtlil2genome_out(rtlil_cell, mapper);
 	genome_cell.genome = rtlil2genome_genome(rtlil_cell, mapper);
 
 	return genome_cell;

@@ -31,6 +31,7 @@ namespace genome {
 	typedef struct {
 		gates_types_t type;
 		cell_genome_t genome;
+		int id;
 	} cell_t;
 
 	class genome {
