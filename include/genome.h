@@ -23,10 +23,10 @@ namespace genome {
 	};
 
 	typedef struct {
-		int I1;
-		int I2;
-		int I3;
-		int I4;
+		int I1 = -1;
+		int I2 = -1;
+		int I3 = -1;
+		int I4 = -1;
 	} cell_genome_t;
 
 	typedef struct {
@@ -44,6 +44,7 @@ namespace genome {
 			int    size();
 			void   update_cell(cell_t cell);
 			void   order(std::set<int> inputs, std::set<int> outputs);
+			void   print(void (*printer)(const char* format, ...));
 			cell_t get_cell(int id);
 
 			std::vector<cell_genome_t> genomes;

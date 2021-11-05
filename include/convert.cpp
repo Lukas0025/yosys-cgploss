@@ -133,8 +133,12 @@ void design2genome(Design* design, genome::genome *gen) {
 		}
 
 		for (auto input : mapper.in) {
-			log("wire name is %s, id is %d\n", mapper.inverse_signal_map[input].wire->name.c_str(), mapper.inverse_signal_map[input].wire->port_input);
+			log("wire name is %s, id is %d\n", mapper.inverse_signal_map[input].wire->name.c_str(), mapper.inverse_signal_map[input].wire->port_id);
 		}
+
+		gen->print(log);
+
+		gen->order(mapper.in, mapper.out);
 
 
 		log("%d readed LOGIC cells\n", gen->size());

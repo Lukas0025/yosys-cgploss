@@ -12,6 +12,15 @@ yosys -m cgploss.so
 ```
 `cgploss.so` is builded YOSYS extension what you can build or download from github (Release builds).
 
+## Using
+
+```bash
+yosys> read_verilog code.v
+yosys> techmap
+yosys> abc
+yosys> cgploss
+```
+
 ## Building
 
 For build you need forder with YOSYS source codes, this forder is included as git submodule `yosys`. Build as it self can be run using makefile using simple make command

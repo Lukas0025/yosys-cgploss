@@ -30,6 +30,9 @@ struct cgploss : public Pass {
 		auto main_genome = new genome::genome();
 
 		design2genome(design, main_genome);
+
+		main_genome->print(log);
+
 	}
 
 } cgploss;
