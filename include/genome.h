@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <set>
+#include <algorithm>
 
 namespace genome {
 	enum gates_types_t {
@@ -18,8 +19,7 @@ namespace genome {
 		GATE_AOI3,
 		GATE_OAI3,
 		GATE_AOI4,
-		GATE_OAI4,
-		GATE_MUX
+		GATE_OAI4
 	};
 
 	typedef struct {
@@ -47,7 +47,8 @@ namespace genome {
 			cell_t get_cell(int id);
 
 			std::vector<cell_genome_t> genomes;
-			std::vector<gates_types_t> environment;
-			std::set<int>              outputs, inputs;
+			std::vector<gates_types_t> env;
+			std::set<int>              out, in;
+			int last_input;
 	};
 }

@@ -1,12 +1,14 @@
 typedef struct mapper {
 	std::map<Yosys::RTLIL::SigBit, int> signal_map;
+	std::map<int, Yosys::RTLIL::SigBit> inverse_signal_map;
     std::set<int>                       in, out;
 } mapper_t;
 
 int map_signal(RTLIL::SigSpec bit, mapper_t *mapper, genome::genome *gen, bool output = false) {
 	if (mapper->signal_map.count(bit) == 0) {
 
-		mapper->signal_map[bit] = gen->size();
+		mapper->signal_map[bit]                 = gen->size();
+		mapper->inverse_signal_map[gen->size()] = bit;
 		
         if (output) {
             mapper->out.insert(gen->size());
@@ -48,10 +50,6 @@ genome::gates_types_t rtlil2genome_type(RTLIL::Cell* cell) {
         return genome::GATE_NOT;
     else if (cell->type == ID($_BUF_))
         return genome::GATE_BUF;
-    else if (cell->type == ID($_MUX_))
-        return genome::GATE_MUX;
-    else if (cell->type == ID($_NMUX_))
-        return genome::GATE_MUX;
     else if (cell->type == ID($_AOI3_))
         return genome::GATE_AOI3;
     else if (cell->type == ID($_OAI3_))
@@ -83,15 +81,6 @@ genome::cell_genome_t rtlil2genome_genome(RTLIL::Cell* cell, genome::genome *gen
 
 		genome.I1 = map_signal(sig_a, mapper, gen);
 		genome.I2 = map_signal(sig_b, mapper, gen);
-
-    } else if (cell->type.in(ID($_MUX_), ID($_NMUX_))) {
-		auto sig_a = cell->getPort(ID::A);
-		auto sig_b = cell->getPort(ID::B);
-		auto sig_s = cell->getPort(ID::S);
-
-        genome.I1 = map_signal(sig_a, mapper, gen);
-        genome.I2 = map_signal(sig_b, mapper, gen);
-        genome.I3 = map_signal(sig_s, mapper, gen);
 
 	} else if (cell->type.in(ID($_AOI3_), ID($_OAI3_))) {
 		auto sig_a = cell->getPort(ID::A);
@@ -139,8 +128,12 @@ void design2genome(Design* design, genome::genome *gen) {
 		for (auto cell : mod->selected_cells()) {
 
 			rtlil2genome_cell(cell, gen, &mapper);
-			mod->remove(cell); //delete cell in reprezentation
+			//mod->remove(cell); //delete cell in reprezentation
 
+		}
+
+		for (auto input : mapper.in) {
+			log("wire name is %s, id is %d\n", mapper.inverse_signal_map[input].wire->name.c_str(), mapper.inverse_signal_map[input].wire->port_input);
 		}
 
 
