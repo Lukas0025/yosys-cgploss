@@ -29,9 +29,11 @@ struct cgploss : public Pass {
 
 		auto main_genome = new genome::genome();
 
-		design2genome(design, main_genome);
+		auto map = design2genome(design, main_genome);
 
 		main_genome->print(log);
+
+		genome2design(main_genome, design, map);
 
 	}
 

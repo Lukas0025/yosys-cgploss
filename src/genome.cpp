@@ -124,4 +124,18 @@ namespace genome {
 
 		return cell;
 	}
+
+	cell_t genome::pop_cell_front() {
+		cell_t cell;
+		cell.id = -1;
+		
+		if (this->size() > 0) {
+			this->get_cell(0);
+			this->genomes.erase(this->genomes.begin());
+			this->env.erase(this->env.begin());
+		}
+
+		return cell;
+
+	}
 }

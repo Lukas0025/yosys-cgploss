@@ -46,6 +46,7 @@ namespace genome {
 			void   order(std::set<int> inputs, std::set<int> outputs);
 			void   print(void (*printer)(const char* format, ...));
 			cell_t get_cell(int id);
+			cell_t pop_cell_front();
 
 			std::vector<cell_genome_t> genomes;
 			std::vector<gates_types_t> env;

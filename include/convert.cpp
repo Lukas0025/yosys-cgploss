@@ -116,7 +116,33 @@ void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, genome::genome *gen, mapper_t *m
 	gen->update_cell(genome_cell);
 }
 
-void design2genome(Design* design, genome::genome *gen) {
+//http://www.clifford.at/yosys/files/yosys_presentation.pdf
+void genome2design(genome::genome *gen, Design* design, mapper_t mapper) {
+	std::map<int, RTLIL::Wire*> assign_map;
+	auto mod = design->selected_modules()[0];
+
+	for (auto input : mapper.in) {
+		assign_map[input] = mapper.inverse_signal_map[input].wire;
+	}
+
+	while (gen->size()) {
+		auto cell = gen->pop_cell_front();
+
+		auto a = assign_map[cell.genome.I1];
+		auto b = assign_map[cell.genome.I2];
+		auto y = mod->addWire("$cgploss_y_" + cell.id);
+
+		assign_map[cell.id] = y;
+
+		//gate(NEW_ID, a, b, y);
+		//module->addNeg()
+	}
+
+
+	mod->fixup_ports();
+}
+
+mapper_t design2genome(Design* design, genome::genome *gen) {
 	mapper_t mapper;
 
 	for (auto mod : design->selected_modules()) {
@@ -128,7 +154,7 @@ void design2genome(Design* design, genome::genome *gen) {
 		for (auto cell : mod->selected_cells()) {
 
 			rtlil2genome_cell(cell, gen, &mapper);
-			//mod->remove(cell); //delete cell in reprezentation
+			mod->remove(cell); //delete cell in reprezentation
 
 		}
 
@@ -138,9 +164,11 @@ void design2genome(Design* design, genome::genome *gen) {
 
 		gen->print(log);
 
-		gen->order(mapper.in, mapper.out);
+		//gen->order(mapper.in, mapper.out);
 
 
 		log("%d readed LOGIC cells\n", gen->size());
 	}
+
+	return mapper;
 }
