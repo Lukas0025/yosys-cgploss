@@ -119,20 +119,36 @@ void genome2design(genome::genome *chromosome, Design* design) {
 	std::map<int, RTLIL::Wire*> assign_map;
 	auto mod = design->selected_modules()[0];
 
+	//map inputs
 	for (auto input = chromosome->wire_in.begin(); input != chromosome->wire_in.end(); input++) {
+		assign_map[input->first] = (RTLIL::Wire *) input->second;
 	}
 
-	while (chromosome->size()) {
-		auto cell = chromosome->pop_cell_front();
+	//map outputs
+	for (auto output = chromosome->wire_out.begin(); output != chromosome->wire_out.end(); output++) {
+		assign_map[output->first] = (RTLIL::Wire *) output->second;
+	}
 
-		auto a = assign_map[cell.gene.I1];
-		auto b = assign_map[cell.gene.I2];
-		auto y = mod->addWire("$cgploss_y_" + std::to_string(cell.id));
+	for (auto i = chromosome->last_input + 1; i < chromosome->size(); i++) {
 
-		assign_map[cell.id] = y;
+		auto cell = chromosome->get_cell(i);
 
-		//gate(NEW_ID, a, b, y);
-		//module->addNeg()
+		RTLIL::Wire* a = assign_map[cell.gene.I1];
+		RTLIL::Wire* b = assign_map[cell.gene.I2];
+		RTLIL::Wire* y;
+
+		if (assign_map.count(cell.id)) {
+			y = assign_map[cell.id];
+		} else {
+			y = mod->addWire("$cgploss_y_" + std::to_string(cell.id));
+			assign_map[cell.id] = y;
+		}
+
+		if (cell.type == genome::GATE_AND) {
+			mod->addAnd(NEW_ID, a, b, y);
+		} else if (cell.type == genome::GATE_OR) {
+			mod->addOr(NEW_ID, a, b, y);
+		}
 	}
 
 
