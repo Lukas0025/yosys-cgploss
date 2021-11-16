@@ -22,16 +22,16 @@ namespace genome {
 		GATE_OAI4
 	};
 
-	typedef struct {
+	typedef struct cell_gene {
 		int I1 = -1;
 		int I2 = -1;
 		int I3 = -1;
 		int I4 = -1;
-	} cell_genome_t;
+	} cell_gene_t;
 
 	typedef struct {
 		gates_types_t type;
-		cell_genome_t genome;
+		cell_gene_t gene;
 		int id;
 	} cell_t;
 
@@ -48,7 +48,7 @@ namespace genome {
 			cell_t get_cell(int id);
 			cell_t pop_cell_front();
 
-			std::vector<cell_genome_t> genomes;
+			std::vector<cell_gene_t> chromosome;
 			std::vector<gates_types_t> env;
 			std::set<int>              out, in;
 			int last_input;

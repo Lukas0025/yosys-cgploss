@@ -4,19 +4,19 @@ typedef struct mapper {
     std::set<int>                       in, out;
 } mapper_t;
 
-int map_signal(RTLIL::SigSpec bit, mapper_t *mapper, genome::genome *gen, bool output = false) {
+int map_signal(RTLIL::SigSpec bit, mapper_t *mapper, genome::genome *chromosome, bool output = false) {
 	if (mapper->signal_map.count(bit) == 0) {
 
-		mapper->signal_map[bit]                 = gen->size();
-		mapper->inverse_signal_map[gen->size()] = bit;
+		mapper->signal_map[bit]                        = chromosome->size();
+		mapper->inverse_signal_map[chromosome->size()] = bit;
 		
         if (output) {
-            mapper->out.insert(gen->size());
+            mapper->out.insert(chromosome->size());
         } else {
-            mapper->in.insert(gen->size());
+            mapper->in.insert(chromosome->size());
         }
 
-        gen->add_dummy_cell();
+        chromosome->add_dummy_cell();
 
 	} else {
         if (output) {
@@ -62,34 +62,34 @@ genome::gates_types_t rtlil2genome_type(RTLIL::Cell* cell) {
 		log_abort();
 }
 
-int rtlil2genome_out(RTLIL::Cell* cell, genome::genome *gen, mapper_t *mapper) {
+int rtlil2genome_out(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
     auto sig_y = cell->getPort(ID::Y);
-    return map_signal(sig_y, mapper, gen, true);
+    return map_signal(sig_y, mapper, chromosome, true);
 }
 
-genome::cell_genome_t rtlil2genome_genome(RTLIL::Cell* cell, genome::genome *gen, mapper_t *mapper) {
-	genome::cell_genome_t genome;
+genome::cell_gene_t rtlil2genome_chromosome(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
+	genome::cell_gene_t gene;
 
     if (cell->type.in(ID($_BUF_), ID($_NOT_))) {
 		auto sig_a = cell->getPort(ID::A);
         
-        genome.I1 = map_signal(sig_a, mapper, gen);
+        gene.I1 = map_signal(sig_a, mapper, chromosome);
 
 	} else if (cell->type.in(ID($_AND_), ID($_NAND_), ID($_OR_), ID($_NOR_), ID($_XOR_), ID($_XNOR_), ID($_ANDNOT_), ID($_ORNOT_))) {
 		auto sig_a = cell->getPort(ID::A);
 		auto sig_b = cell->getPort(ID::B);
 
-		genome.I1 = map_signal(sig_a, mapper, gen);
-		genome.I2 = map_signal(sig_b, mapper, gen);
+		gene.I1 = map_signal(sig_a, mapper, chromosome);
+		gene.I2 = map_signal(sig_b, mapper, chromosome);
 
 	} else if (cell->type.in(ID($_AOI3_), ID($_OAI3_))) {
 		auto sig_a = cell->getPort(ID::A);
 		auto sig_b = cell->getPort(ID::B);
 		auto sig_c = cell->getPort(ID::C);
 
-		genome.I1 = map_signal(sig_a, mapper, gen);
-		genome.I2 = map_signal(sig_b, mapper, gen);
-		genome.I3 = map_signal(sig_c, mapper, gen);
+		gene.I1 = map_signal(sig_a, mapper, chromosome);
+		gene.I2 = map_signal(sig_b, mapper, chromosome);
+		gene.I3 = map_signal(sig_c, mapper, chromosome);
 
 	} else if (cell->type.in(ID($_AOI4_), ID($_OAI4_))) {
 		auto sig_a = cell->getPort(ID::A);
@@ -97,27 +97,27 @@ genome::cell_genome_t rtlil2genome_genome(RTLIL::Cell* cell, genome::genome *gen
 		auto sig_c = cell->getPort(ID::C);
 		auto sig_d = cell->getPort(ID::D);
 
-		genome.I1 = map_signal(sig_a, mapper, gen);
-		genome.I2 = map_signal(sig_b, mapper, gen);
-		genome.I3 = map_signal(sig_c, mapper, gen);
-		genome.I4 = map_signal(sig_d, mapper, gen);
+		gene.I1 = map_signal(sig_a, mapper, chromosome);
+		gene.I2 = map_signal(sig_b, mapper, chromosome);
+		gene.I3 = map_signal(sig_c, mapper, chromosome);
+		gene.I4 = map_signal(sig_d, mapper, chromosome);
 	}
 
-	return genome;
+	return gene;
 }
 
-void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, genome::genome *gen, mapper_t *mapper) {
-	genome::cell_t genome_cell;
+void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, genome::genome *chromosome, mapper_t *mapper) {
+	genome::cell_t chromosome_cell;
 
-	genome_cell.type   = rtlil2genome_type(rtlil_cell);
-    genome_cell.id     = rtlil2genome_out(rtlil_cell, gen, mapper);
-	genome_cell.genome = rtlil2genome_genome(rtlil_cell, gen, mapper);
+	chromosome_cell.type   = rtlil2genome_type(rtlil_cell);
+    chromosome_cell.id     = rtlil2genome_out(rtlil_cell, chromosome, mapper);
+	chromosome_cell.gene   = rtlil2genome_chromosome(rtlil_cell, chromosome, mapper);
 
-	gen->update_cell(genome_cell);
+	chromosome->update_cell(chromosome_cell);
 }
 
 //http://www.clifford.at/yosys/files/yosys_presentation.pdf
-void genome2design(genome::genome *gen, Design* design, mapper_t mapper) {
+void genome2design(genome::genome *chromosome, Design* design, mapper_t mapper) {
 	std::map<int, RTLIL::Wire*> assign_map;
 	auto mod = design->selected_modules()[0];
 
@@ -125,14 +125,15 @@ void genome2design(genome::genome *gen, Design* design, mapper_t mapper) {
 		assign_map[input] = mapper.inverse_signal_map[input].wire;
 	}
 
-	while (gen->size()) {
-		auto cell = gen->pop_cell_front();
+	chromosome->pop_front();
+	while (chromosome->size()) {
+		auto cell = chromosome->pop_cell_front();
 
-		auto a = assign_map[cell.genome.I1];
-		auto b = assign_map[cell.genome.I2];
-		auto y = mod->addWire("$cgploss_y_" + cell.id);
+		auto a = assign_map[cell.gene.I1];
+		auto b = assign_map[cell.gene.I2];
+		auto y = mod->addWire("$cgploss_y_" + std::to_string(wire_id));
 
-		assign_map[cell.id] = y;
+		assign_map[wire_id] = y;
 
 		//gate(NEW_ID, a, b, y);
 		//module->addNeg()
@@ -142,7 +143,7 @@ void genome2design(genome::genome *gen, Design* design, mapper_t mapper) {
 	mod->fixup_ports();
 }
 
-mapper_t design2genome(Design* design, genome::genome *gen) {
+mapper_t design2genome(Design* design, genome::genome *chromosome) {
 	mapper_t mapper;
 
 	for (auto mod : design->selected_modules()) {
@@ -153,7 +154,7 @@ mapper_t design2genome(Design* design, genome::genome *gen) {
 
 		for (auto cell : mod->selected_cells()) {
 
-			rtlil2genome_cell(cell, gen, &mapper);
+			rtlil2genome_cell(cell, chromosome, &mapper);
 			mod->remove(cell); //delete cell in reprezentation
 
 		}
@@ -162,12 +163,12 @@ mapper_t design2genome(Design* design, genome::genome *gen) {
 			log("wire name is %s, id is %d\n", mapper.inverse_signal_map[input].wire->name.c_str(), mapper.inverse_signal_map[input].wire->port_id);
 		}
 
-		gen->print(log);
+		chromosome->print(log);
 
 		//gen->order(mapper.in, mapper.out);
 
 
-		log("%d readed LOGIC cells\n", gen->size());
+		log("%d readed LOGIC cells\n", chromosome->size());
 	}
 
 	return mapper;

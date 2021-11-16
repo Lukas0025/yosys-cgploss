@@ -7,38 +7,38 @@ namespace genome {
 
 	void genome::swap_id(int id_a, int id_b) {
 
-		for(auto genome = this->genomes.begin(); genome < this->genomes.end(); genome++) {
-			if (genome->I1 == id_a) {
-				genome->I1 = id_b;
-			} else if (genome->I1 == id_b) {
-				genome->I1 = id_a;
+		for(auto gene = this->chromosome.begin(); gene < this->chromosome.end(); gene++) {
+			if (gene->I1 == id_a) {
+				gene->I1 = id_b;
+			} else if (gene->I1 == id_b) {
+				gene->I1 = id_a;
 			}
 
-			if (genome->I2 == id_a) {
-				genome->I2 = id_b;
-			} else if (genome->I2 == id_b) {
-				genome->I2 = id_a;
+			if (gene->I2 == id_a) {
+				gene->I2 = id_b;
+			} else if (gene->I2 == id_b) {
+				gene->I2 = id_a;
 			}
 
-			if (genome->I3 == id_a) {
-				genome->I3 = id_b;
-			} else if (genome->I3 == id_b) {
-				genome->I3 = id_a;
+			if (gene->I3 == id_a) {
+				gene->I3 = id_b;
+			} else if (gene->I3 == id_b) {
+				gene->I3 = id_a;
 			}
 
-			if (genome->I4 == id_a) {
-				genome->I4 = id_b;
-			} else if (genome->I4 == id_b) {
-				genome->I4 = id_a;
+			if (gene->I4 == id_a) {
+				gene->I4 = id_b;
+			} else if (gene->I4 == id_b) {
+				gene->I4 = id_a;
 			}
 		}
 
-		std::swap(this->genomes[id_a], this->genomes[id_b]);
+		std::swap(this->chromosome[id_a], this->chromosome[id_b]);
 		std::swap(this->env[id_a],     this->env[id_b]);
 	}
 
 	void genome::add_cell(cell_t cell) {
-		this->genomes.push_back(cell.genome);
+		this->chromosome.push_back(cell.gene);
 		this->env.push_back(cell.type);
 	}
 
@@ -51,12 +51,12 @@ namespace genome {
 	}
 
 	int genome::size() {
-		return this->genomes.size();
+		return this->chromosome.size();
 	}
 
 	void genome::update_cell(cell_t cell) {
-		this->genomes[cell.id] = cell.genome;
-		this->env[cell.id]     = cell.type;
+		this->chromosome[cell.id] = cell.gene;
+		this->env[cell.id]        = cell.type;
 	}
 
 	void genome::order(std::set<int> inputs, std::set<int> outputs) {
@@ -96,10 +96,10 @@ namespace genome {
 	}
 
 	void genome::print(void (*log)(const char* format, ...)) {
-		log("genome: [ ");
+		log("chromosome: [ ");
 
-		for (auto genome : this->genomes) {
-			log(" %d %d %d %d    ", genome.I1, genome.I2, genome.I3, genome.I4);
+		for (auto gene: this->chromosome) {
+			log(" %d %d %d %d    ", gene.I1, gene.I2, gene.I3, gene.I4);
 		}
 
 		log("]\n\n");
@@ -118,7 +118,7 @@ namespace genome {
 	cell_t genome::get_cell(int id) {
 		cell_t cell;
 
-		cell.genome = this->genomes[id];
+		cell.gene   = this->chromosome[id];
 		cell.type   = this->env[id];
 		cell.id     = id;
 
@@ -130,8 +130,8 @@ namespace genome {
 		cell.id = -1;
 		
 		if (this->size() > 0) {
-			this->get_cell(0);
-			this->genomes.erase(this->genomes.begin());
+			cell = this->get_cell(0);
+			this->chromosome.erase(this->chromosome.begin());
 			this->env.erase(this->env.begin());
 		}
 
