@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <set>
+#include <map>
 #include <algorithm>
 
 namespace genome {
@@ -43,14 +43,14 @@ namespace genome {
 			void   add_dummy_cell();
 			int    size();
 			void   update_cell(cell_t cell);
-			void   order(std::set<int> inputs, std::set<int> outputs);
+			bool   order(std::map<int, void*> inputs, std::map<int, void*> outputs);
 			void   print(void (*printer)(const char* format, ...));
 			cell_t get_cell(int id);
 			cell_t pop_cell_front();
 
 			std::vector<cell_gene_t> chromosome;
 			std::vector<gates_types_t> env;
-			std::set<int>              out, in;
+			std::map<int, void*> wire_out, wire_in;
 			int last_input;
 	};
 }

@@ -1,19 +1,17 @@
 typedef struct mapper {
-	std::map<Yosys::RTLIL::SigBit, int> signal_map;
-	std::map<int, Yosys::RTLIL::SigBit> inverse_signal_map;
-    std::set<int>                       in, out;
+	std::map<RTLIL::SigBit, int> signal_map;
+    std::map<int, void*> in, out;
 } mapper_t;
 
-int map_signal(RTLIL::SigSpec bit, mapper_t *mapper, genome::genome *chromosome, bool output = false) {
+int map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, bool output = false) {
 	if (mapper->signal_map.count(bit) == 0) {
 
-		mapper->signal_map[bit]                        = chromosome->size();
-		mapper->inverse_signal_map[chromosome->size()] = bit;
+		mapper->signal_map[bit] = chromosome->size();
 		
         if (output) {
-            mapper->out.insert(chromosome->size());
+            mapper->out[chromosome->size()] = bit.wire;
         } else {
-            mapper->in.insert(chromosome->size());
+            mapper->in[chromosome->size()]  = bit.wire;
         }
 
         chromosome->add_dummy_cell();
@@ -117,23 +115,21 @@ void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, genome::genome *chromosome, mapp
 }
 
 //http://www.clifford.at/yosys/files/yosys_presentation.pdf
-void genome2design(genome::genome *chromosome, Design* design, mapper_t mapper) {
+void genome2design(genome::genome *chromosome, Design* design) {
 	std::map<int, RTLIL::Wire*> assign_map;
 	auto mod = design->selected_modules()[0];
 
-	for (auto input : mapper.in) {
-		assign_map[input] = mapper.inverse_signal_map[input].wire;
+	for (auto input = chromosome->wire_in.begin(); input != chromosome->wire_in.end(); input++) {
 	}
 
-	chromosome->pop_front();
 	while (chromosome->size()) {
 		auto cell = chromosome->pop_cell_front();
 
 		auto a = assign_map[cell.gene.I1];
 		auto b = assign_map[cell.gene.I2];
-		auto y = mod->addWire("$cgploss_y_" + std::to_string(wire_id));
+		auto y = mod->addWire("$cgploss_y_" + std::to_string(cell.id));
 
-		assign_map[wire_id] = y;
+		assign_map[cell.id] = y;
 
 		//gate(NEW_ID, a, b, y);
 		//module->addNeg()
@@ -153,19 +149,13 @@ mapper_t design2genome(Design* design, genome::genome *chromosome) {
 		}
 
 		for (auto cell : mod->selected_cells()) {
-
 			rtlil2genome_cell(cell, chromosome, &mapper);
 			mod->remove(cell); //delete cell in reprezentation
 
 		}
 
-		for (auto input : mapper.in) {
-			log("wire name is %s, id is %d\n", mapper.inverse_signal_map[input].wire->name.c_str(), mapper.inverse_signal_map[input].wire->port_id);
-		}
-
 		chromosome->print(log);
-
-		//gen->order(mapper.in, mapper.out);
+		chromosome->order(mapper.in, mapper.out);
 
 
 		log("%d readed LOGIC cells\n", chromosome->size());
