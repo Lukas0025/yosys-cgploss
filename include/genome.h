@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <set>
 #include <algorithm>
 
 namespace genome {
@@ -40,6 +41,11 @@ namespace genome {
 		cell_gene_t gene;
 		int id;
 	} cell_t;
+
+	const std::set<int> I1Gates = { GATE_BUF, GATE_NOT };
+	const std::set<int> I2Gates = { GATE_AND, GATE_NAND, GATE_OR, GATE_NOR, GATE_XOR, GATE_XNOR, GATE_ANDNOT, GATE_ORNOT };
+	const std::set<int> I3Gates = { GATE_AOI3, GATE_OAI3 };
+	const std::set<int> I4Gates = { GATE_AOI4, GATE_OAI4 };
 
 	class genome {
 		public:

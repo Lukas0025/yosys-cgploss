@@ -179,9 +179,8 @@ void genome2design(genome::genome *chromosome, Design* design) {
 
 		auto cell = chromosome->get_cell(i);
 
-		RTLIL::Wire* a = assign_map[cell.gene.I1];
-		RTLIL::Wire* b = assign_map[cell.gene.I2];
 		RTLIL::Wire* y;
+		RTLIL::Cell *gate_cell = NULL;
 
 		if (assign_map.count(cell.id)) {
 			y = assign_map[cell.id];
@@ -190,10 +189,69 @@ void genome2design(genome::genome *chromosome, Design* design) {
 			assign_map[cell.id] = y;
 		}
 
-		if (cell.type == genome::GATE_AND) {
-			mod->addAnd(NEW_ID, a, b, y);
-		} else if (cell.type == genome::GATE_OR) {
-			mod->addOr(NEW_ID, a, b, y);
+		if (genome::I1Gates.count(cell.type)) {
+
+			if (cell.type == genome::GATE_NOT) {
+				gate_cell = mod->addCell(NEW_ID, "$_NOT_");
+			} else if (cell.type == genome::GATE_BUF) {
+				//mod->addBuf(NEW_ID, a, y);
+			}
+
+			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
+
+		} else if (genome::I2Gates.count(cell.type)) {
+
+			if (cell.type == genome::GATE_AND) {
+				gate_cell = mod->addCell(NEW_ID, "$_AND_");
+			} else if (cell.type == genome::GATE_NAND) {
+				gate_cell = mod->addCell(NEW_ID, "$_NAND_");
+			} else if (cell.type == genome::GATE_OR) {
+				gate_cell = mod->addCell(NEW_ID, "$_OR_");
+			} else if (cell.type == genome::GATE_NOR) {
+				gate_cell = mod->addCell(NEW_ID, "$_NOR_");
+			} else if (cell.type == genome::GATE_XOR) {
+				gate_cell = mod->addCell(NEW_ID, "$_XOR_");
+			} else if (cell.type == genome::GATE_XNOR) {
+				gate_cell = mod->addCell(NEW_ID, "$_XNOR_");
+			} else if (cell.type == genome::GATE_ANDNOT) {
+				gate_cell = mod->addCell(NEW_ID, "$_ANDNOT_");
+			} else if (cell.type == genome::GATE_ORNOT) {
+				gate_cell = mod->addCell(NEW_ID, "$_ORNOT_");
+			}
+
+			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
+			gate_cell->setPort(ID::B, assign_map[cell.gene.I2]);
+
+		} else if (genome::I3Gates.count(cell.type)) {
+
+			if (cell.type == genome::GATE_AOI3) {
+				gate_cell = mod->addCell(NEW_ID, "$_AOI3_");
+			} else if (cell.type == genome::GATE_OAI3) {
+				gate_cell = mod->addCell(NEW_ID, "$_OAI3_");
+			}
+
+			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
+			gate_cell->setPort(ID::B, assign_map[cell.gene.I2]);
+			gate_cell->setPort(ID::C, assign_map[cell.gene.I3]);
+
+		} else if (genome::I4Gates.count(cell.type)) {
+
+			if (cell.type == genome::GATE_AOI4) {
+				gate_cell = mod->addCell(NEW_ID, "$_AOI4_");
+			} else if (cell.type == genome::GATE_OAI4) {
+				gate_cell = mod->addCell(NEW_ID, "$_OAI4_");
+			}
+
+			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
+			gate_cell->setPort(ID::B, assign_map[cell.gene.I2]);
+			gate_cell->setPort(ID::C, assign_map[cell.gene.I3]);
+			gate_cell->setPort(ID::D, assign_map[cell.gene.I4]);
+		}
+
+		if (gate_cell) {
+			gate_cell->setPort(ID::Y, y);
+		} else {
+			//error
 		}
 	}
 
