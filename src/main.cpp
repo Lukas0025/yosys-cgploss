@@ -33,7 +33,7 @@ struct cgploss : public Pass {
 
 		main_genome->print(log);
 
-		//genome2design(main_genome, design);
+		genome2design(main_genome, design);
 
 	}
 

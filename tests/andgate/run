@@ -1,4 +1,0 @@
-read_verilog tests/andgate/code.v
-techmap
-abc
-cgploss

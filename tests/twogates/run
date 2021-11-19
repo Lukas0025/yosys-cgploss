@@ -1,3 +1,0 @@
-read_verilog tests/twogates/code.v
-techmap
-cgploss

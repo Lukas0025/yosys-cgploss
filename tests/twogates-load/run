@@ -1,0 +1,4 @@
+read_verilog tests/twogates-load/code.v
+techmap
+cgploss
+write_verilog test_out.v
