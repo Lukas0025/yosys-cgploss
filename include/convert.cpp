@@ -1,8 +1,22 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with support convert functions
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
 typedef struct mapper {
 	std::map<RTLIL::SigBit, int> signal_map;
     std::map<int, void*> in, out;
 } mapper_t;
 
+/**
+ * Map signal to ID of gene in chromosome
+ * @param bit RTLIL::SigBit signal for map
+ * @param mapper mapper with RTLIL>GENE signal maps
+ * @param chromosome is chromosome where signal is maped as gene or going to by map
+ * @param output bool is this signal output of gate
+ * @return int id of Gene
+ */
 int map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, bool output = false) {
 	if (mapper->signal_map.count(bit) == 0) {
 
@@ -27,6 +41,11 @@ int map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, 
 	return mapper->signal_map[bit];
 }
 
+/**
+ * Get type of RTLIL cell in genome type
+ * @param cell RTLIL::Cell* cell in RTLIL reprezentation
+ * @return genome::gates_types_t
+ */
 genome::gates_types_t rtlil2genome_type(RTLIL::Cell* cell) {
     if (cell->type == ID($_AND_))
 		return genome::GATE_AND;
@@ -60,12 +79,27 @@ genome::gates_types_t rtlil2genome_type(RTLIL::Cell* cell) {
 		log_abort();
 }
 
+/**
+ * Map rtlil cell output to GENE part
+ * @param cell RTLIL::Cell* cell in RTLIL reprezentation
+ * @param chromosome is chromosome where signal is maped as gene or going to by map
+ * @param mapper mapper with RTLIL>GENE signal maps
+ * @return int id of output in chromosome (PART OF GENE)
+ */
 int rtlil2genome_out(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
     auto sig_y = cell->getPort(ID::Y);
     return map_signal(sig_y, mapper, chromosome, true);
 }
 
-genome::cell_gene_t rtlil2genome_chromosome(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
+
+/**
+ * Convert rtlil cell to cell gene
+ * @param cell RTLIL::Cell* cell in RTLIL reprezentation
+ * @param chromosome is chromosome where signal is maped as gene or going to by map
+ * @param mapper mapper with RTLIL>GENE signal maps
+ * @return genome::cell_gene_t (part of chromosome) must be added to chromosome manualy
+ */
+genome::cell_gene_t rtlil2genome_gene(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
 	genome::cell_gene_t gene;
 
     if (cell->type.in(ID($_BUF_), ID($_NOT_))) {
@@ -104,17 +138,29 @@ genome::cell_gene_t rtlil2genome_chromosome(RTLIL::Cell* cell, genome::genome *c
 	return gene;
 }
 
+/**
+ * Add rtlil cell to chromosome
+ * @param rtlil_cell RTLIL::Cell* cell in RTLIL reprezentation
+ * @param chromosome is chromosome where signal is maped as gene or going to by map
+ * @param mapper mapper with RTLIL>GENE signal maps
+ * @return genome::cell_gene_t (part of chromosome) must be added to chromosome manualy
+ */
 void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, genome::genome *chromosome, mapper_t *mapper) {
 	genome::cell_t chromosome_cell;
 
 	chromosome_cell.type   = rtlil2genome_type(rtlil_cell);
     chromosome_cell.id     = rtlil2genome_out(rtlil_cell, chromosome, mapper);
-	chromosome_cell.gene   = rtlil2genome_chromosome(rtlil_cell, chromosome, mapper);
+	chromosome_cell.gene   = rtlil2genome_gene(rtlil_cell, chromosome, mapper);
 
 	chromosome->update_cell(chromosome_cell);
 }
 
-//http://www.clifford.at/yosys/files/yosys_presentation.pdf
+/**
+ * Convert chromosome to RTLIL reprezentation
+ * Same basic od adding RTLIL cell, etc. is in: http://www.clifford.at/yosys/files/yosys_presentation.pdf
+ * @param chromosome is chromosome what goting to be convert to rtllil reprezentation
+ * @param design is design where RTLIL reprezenation be strored
+ */
 void genome2design(genome::genome *chromosome, Design* design) {
 	std::map<int, RTLIL::Wire*> assign_map;
 	auto mod = design->selected_modules()[0];
@@ -155,6 +201,12 @@ void genome2design(genome::genome *chromosome, Design* design) {
 	mod->fixup_ports();
 }
 
+/**
+ * Convert RTLIL reprezentation to chromosome
+ * Same basic is in: ABC
+ * @param chromosome is chromosome where going to by stored created genes 
+ * @param design is design what going to by converted to chromosome
+ */
 mapper_t design2genome(Design* design, genome::genome *chromosome) {
 	mapper_t mapper;
 
@@ -170,7 +222,6 @@ mapper_t design2genome(Design* design, genome::genome *chromosome) {
 
 		}
 
-		chromosome->print(log);
 		chromosome->order(mapper.in, mapper.out);
 
 
