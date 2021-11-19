@@ -25,8 +25,18 @@ yosys> cgploss
 
 For build you need forder with YOSYS source codes, this forder is included as git submodule `yosys`. Build as it self can be run using makefile using simple make command
 
+need packages `build-essential clang`
+
 ```bash
 make
+```
+
+## Running tests
+
+need package `iverilog`
+
+```bash
+make tests
 ```
 
 ## Makefile targets
