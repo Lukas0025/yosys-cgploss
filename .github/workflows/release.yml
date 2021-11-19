@@ -23,6 +23,9 @@ jobs:
 
       - name: build
         run: make
+
+      - name: tests
+        run: make tests
           
       - name: Create Release
         id: create_release
