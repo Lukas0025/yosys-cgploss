@@ -1,3 +1,9 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with chromosome header
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
 #pragma once
 #include <vector>
 #include <map>
@@ -38,19 +44,77 @@ namespace genome {
 	class genome {
 		public:
 			genome();
-			void   add_cell(cell_t cell);
-			void   swap_id(int id_a, int id_b);
-			void   add_dummy_cell();
-			int    size();
-			void   update_cell(cell_t cell);
-			bool   order(std::map<int, void*> inputs, std::map<int, void*> outputs);
-			void   print(void (*printer)(const char* format, ...));
-			cell_t get_cell(int id);
-			cell_t pop_cell_front();
 
+			/**
+			 * Add cell to chromosome (On top)
+			 * @param cell cell to insert to chromosome
+			 */
+			void   add_cell(cell_t cell);
+			
+			/**
+			 * Swap two ID of cells in chromosome
+			 * Swap position in chromosome and replace all links to old position to new
+			 * @param id_a id of gene (cell) to swap
+			 * @param id_b id of second gene to swap
+			 */
+			void   swap_id(int id_a, int id_b);
+
+			/**
+			 * Add dummy cell to chromosome (On top)
+			 * do nothing and have gene [-1, -1, -1, -1]
+			 */
+			void   add_dummy_cell();
+
+			/**
+			 * Get size of chromosome
+			 */
+			int    size();
+
+			/**
+			 * Update cell (GENE) in chromosome
+			 * @param cell what to be updated
+			 * id in chromesome is cell.id
+			 */
+			void   update_cell(cell_t cell);
+
+			/**
+			 * Update cell (GENE) in chromosome
+			 * @param cell what to be updated
+			 * id in chromesome is cell.id
+			 */
+			bool   order(std::map<int, void*> inputs, std::map<int, void*> outputs);
+
+			/**
+			 * Print chromosome on stdout (DEBUG)
+			 * @param printer function with print string to stdout
+			 */
+			void   print(void (*printer)(const char* format, ...));
+			
+			/**
+			 * Get cell (GENE and TYPE) on position
+			 * @param int id position of cell in chromosome
+			 * @return cell_t
+			 */
+			cell_t get_cell(int id);
+			
+			/**
+			 * Chromosome
+			 */
 			std::vector<cell_gene_t> chromosome;
+			
+			/**
+			 * Envoroment (Types of gates)
+			 */
 			std::vector<gates_types_t> env;
+
+			/**
+			 * map of input and output wires from RTLIL
+			 */
 			std::map<int, void*> wire_out, wire_in;
+
+			/**
+			 * last gate in chromosome of type input
+			 */
 			int last_input;
 	};
 }

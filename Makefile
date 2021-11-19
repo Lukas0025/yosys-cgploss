@@ -10,7 +10,7 @@ run: cgploss.so
 	yosys/yosys -m cgploss.so
 
 tests: cgploss.so
-	@echo "[info] starting units tests"
+	@echo "[info] starting implementation tests"
 	for f in ./tests/*; do \
 		if [ -d "$$f" -a $$(echo -n "$$f" | tail -c 1) != "-" ]; then \
 			echo "$$f STARTED" && \
@@ -21,7 +21,7 @@ tests: cgploss.so
 		fi \
 	done
 	make clean
-	@echo "[info] units tests done"
+	@echo "[info] implementation tests done"
 
 clean:
 	rm -f cgploss.so

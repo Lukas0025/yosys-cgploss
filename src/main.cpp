@@ -1,3 +1,9 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * main file of program
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
 //YOSYS
 #include "kernel/yosys.h"
 #include "kernel/sigtools.h"

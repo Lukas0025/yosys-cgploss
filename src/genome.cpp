@@ -1,3 +1,9 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with chromosome implementation
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
 #include "genome.h"
 
 namespace genome {
@@ -185,19 +191,5 @@ namespace genome {
 		cell.id     = id;
 
 		return cell;
-	}
-
-	cell_t genome::pop_cell_front() {
-		cell_t cell;
-		cell.id = -1;
-		
-		if (this->size() > 0) {
-			cell = this->get_cell(0);
-			this->chromosome.erase(this->chromosome.begin());
-			this->env.erase(this->env.begin());
-		}
-
-		return cell;
-
 	}
 }
