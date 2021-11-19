@@ -33,13 +33,27 @@ struct cgploss : public Pass {
 	void execute(vector<string> params, Design* design) override {
 		log("CGP EXTENSION\n");
 
-		auto main_genome = new genome::genome();
+		/* Params parsing */
+		bool wire_test = false;
+		for (int i = 1; i < params.size(); i++) {
+			std::string param = params[i];
 
-		auto map = design2genome(design, main_genome);
+			if (param == "-wire-test") {
+				wire_test = true;
+			}
+		}
 
-		main_genome->print(log);
+		/* CGP Code */
+		auto chromosome = new genome::genome();
 
-		genome2design(main_genome, design);
+		auto map = design2genome(design, chromosome);
+
+		if (!wire_test) {
+			//CGP CODE
+			chromosome->print(log);
+		}
+
+		genome2design(chromosome, design);
 
 	}
 

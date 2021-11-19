@@ -1,5 +1,5 @@
 read_verilog tests/mux-load/code.v
 techmap
 abc -g AND,NAND,OR,NOR,XOR,XNOR,ANDNOT,ORNOT,AOI3,OAI3,AOI4,OAI4
-cgploss
+cgploss -wire_test
 write_verilog test_out.v
