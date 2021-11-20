@@ -1,0 +1,8 @@
+#builds
+cgploss.so
+cgploss.d
+
+#tests
+test_design
+test_run.txt
+test_out.v
