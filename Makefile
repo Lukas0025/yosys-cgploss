@@ -20,7 +20,10 @@ tests: cgploss.so
 			echo "$$f PASS"; \
 		fi \
 	done
-	make clean
+	# remove tests outputs
+	rm -f test_design
+	rm -f test_run.txt
+	rm -f test_out.v
 	@echo "[info] implementation tests done"
 
 clean:
