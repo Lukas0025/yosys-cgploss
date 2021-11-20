@@ -14,6 +14,13 @@ yosys -m cgploss.so
 
 ## Using
 
+```
+cgploss [options]
+
+options:
+	-wire-test       test load and save part, do not use CGP only load and save [DEBUG]
+```
+
 ```bash
 yosys> read_verilog code.v
 yosys> techmap
