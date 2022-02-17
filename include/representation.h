@@ -4,8 +4,14 @@
  * @author Lukas Plevac <xpleva07@vutbr.cz>
  */
 
+#include "kernel/yosys.h"
+#include "kernel/sigtools.h"
+#include "kernel/celltypes.h"
+
 #include "genome.h"
 #include <string>
+
+#define SAFE_TYPE_ID(X) (X + 1)
 
 namespace representation {
 	class representation {
@@ -14,7 +20,7 @@ namespace representation {
 				this->chromosome = chromosome;
 			}
 
-			virtual genome::io_id_t add_cell(std::vector<genome::io_id_t> inputs, genome::io_id_t output) = 0;
+			virtual genome::io_id_t add_cell(Yosys::RTLIL::IdString type, std::vector<genome::io_id_t> inputs, genome::io_id_t output) = 0;
 			
 			genome::genome* chromosome;
 	};

@@ -111,7 +111,7 @@ void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, representation::representation *
 	auto output = rtlil2genome_out(rtlil_cell, repres->chromosome, mapper);
 	auto inputs = rtlil2genome_inputs(rtlil_cell, repres->chromosome, mapper);
 
-	repres->add_cell(inputs, output);
+	repres->add_cell(rtlil_cell->type, inputs, output);
 }
 
 /**
