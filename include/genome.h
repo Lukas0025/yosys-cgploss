@@ -5,90 +5,67 @@
  */
 
 #pragma once
+
+#include <cstdint>
 #include <vector>
 #include <map>
 #include <set>
 #include <algorithm>
 
+#define DUMMY_GENE_TYPE 0
+
 namespace genome {
-	enum gates_types_t {
-		GATE_DUMMY,
-		GATE_BUF,
-		GATE_NOT,
-		GATE_AND,
-		GATE_NAND,
-		GATE_OR,
-		GATE_NOR,
-		GATE_XOR,
-		GATE_XNOR,
-		GATE_ANDNOT,
-		GATE_ORNOT,
-		GATE_AOI3,
-		GATE_OAI3,
-		GATE_AOI4,
-		GATE_OAI4
-	};
+	typedef uint32_t io_id_t;
+	typedef uint16_t type_t;
 
-	typedef struct cell_gene {
-		int I1 = -1;
-		int I2 = -1;
-		int I3 = -1;
-		int I4 = -1;
-	} cell_gene_t;
-
-	typedef struct {
-		gates_types_t type;
-		cell_gene_t gene;
-		int id;
-	} cell_t;
-
-	const std::set<int> I1Gates = { GATE_BUF, GATE_NOT };
-	const std::set<int> I2Gates = { GATE_AND, GATE_NAND, GATE_OR, GATE_NOR, GATE_XOR, GATE_XNOR, GATE_ANDNOT, GATE_ORNOT };
-	const std::set<int> I3Gates = { GATE_AOI3, GATE_OAI3 };
-	const std::set<int> I4Gates = { GATE_AOI4, GATE_OAI4 };
+	typedef struct gene {
+		type_t  type;
+		io_id_t I1;
+		io_id_t I2;
+	} gene_t;
 
 	class genome {
 		public:
 			genome();
 
 			/**
-			 * Add cell to chromosome (On top)
-			 * @param cell cell to insert to chromosome
+			 * Add gene to chromosome (On top)
+			 * @param gene to insert to chromosome
 			 */
-			void   add_cell(cell_t cell);
+			io_id_t add_gene(gene_t gene);
 			
 			/**
-			 * Swap two ID of cells in chromosome
+			 * Swap two genes by position in chromosome
 			 * Swap position in chromosome and replace all links to old position to new
-			 * @param id_a id of gene (cell) to swap
-			 * @param id_b id of second gene to swap
+			 * @param id_a position of gene to swap
+			 * @param id_b position of second gene to swap
 			 */
-			void   swap_id(int id_a, int id_b);
+			void swap_genes(io_id_t id_a, io_id_t id_b);
 
 			/**
 			 * Add dummy cell to chromosome (On top)
-			 * do nothing and have gene [-1, -1, -1, -1]
+			 * special type what do nothing
 			 */
-			void   add_dummy_cell();
+			void add_dummy_gene();
 
 			/**
-			 * Get size of chromosome
+			 * Get size of chromosome (Number of genes)
 			 */
-			int    size();
+			unsigned size();
 
 			/**
-			 * Update cell (GENE) in chromosome
-			 * @param cell what to be updated
-			 * id in chromesome is cell.id
+			 * Update gene in chromosome
+			 * @param gene to update
+			 * @param pos position of gene in chromosome
 			 */
-			void   update_cell(cell_t cell);
+			void update_gene(io_id_t pos, gene_t gene);
 
 			/**
-			 * Update cell (GENE) in chromosome
-			 * @param cell what to be updated
-			 * id in chromesome is cell.id
+			 * Order genes in chromosome for CGP
+			 * gene can have inputs only under self
+			 * @param inputs inputs map
 			 */
-			bool   order(std::map<int, void*> inputs, std::map<int, void*> outputs);
+			bool order(std::map<io_id_t, void*> inputs, std::map<io_id_t, void*> outputs);
 
 			/**
 			 * Print chromosome on stdout (DEBUG)
@@ -97,30 +74,25 @@ namespace genome {
 			void   print(void (*printer)(const char* format, ...));
 			
 			/**
-			 * Get cell (GENE and TYPE) on position
-			 * @param int id position of cell in chromosome
+			 * Get gene on position
+			 * @param pos position of cell in chromosome
 			 * @return cell_t
 			 */
-			cell_t get_cell(int id);
+			gene_t get_gene(io_id_t pos);
 			
 			/**
 			 * Chromosome
 			 */
-			std::vector<cell_gene_t> chromosome;
-			
-			/**
-			 * Envoroment (Types of gates)
-			 */
-			std::vector<gates_types_t> env;
+			std::vector<gene_t> chromosome;
 
 			/**
 			 * map of input and output wires from RTLIL
 			 */
-			std::map<int, void*> wire_out, wire_in;
+			std::map<io_id_t, void*> wire_out, wire_in;
 
 			/**
 			 * last gate in chromosome of type input
 			 */
-			int last_input;
+			io_id_t last_input;
 	};
 }

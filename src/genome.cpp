@@ -5,13 +5,14 @@
  */
 
 #include "genome.h"
+#include "inttypes.h"
 
 namespace genome {
 	genome::genome() {
 
 	}
 
-	void genome::swap_id(int id_a, int id_b) {
+	void genome::swap_genes(io_id_t id_a, io_id_t id_b) {
 
 		for(auto gene = this->chromosome.begin(); gene < this->chromosome.end(); gene++) {
 			if (gene->I1 == id_a) {
@@ -25,58 +26,45 @@ namespace genome {
 			} else if (gene->I2 == id_b) {
 				gene->I2 = id_a;
 			}
-
-			if (gene->I3 == id_a) {
-				gene->I3 = id_b;
-			} else if (gene->I3 == id_b) {
-				gene->I3 = id_a;
-			}
-
-			if (gene->I4 == id_a) {
-				gene->I4 = id_b;
-			} else if (gene->I4 == id_b) {
-				gene->I4 = id_a;
-			}
 		}
 
 		std::swap(this->chromosome[id_a], this->chromosome[id_b]);
-		std::swap(this->env[id_a],        this->env[id_b]);
 	}
 
-	void genome::add_cell(cell_t cell) {
-		this->chromosome.push_back(cell.gene);
-		this->env.push_back(cell.type);
+	io_id_t genome::add_gene(gene_t gene) {
+		this->chromosome.push_back(gene);
+
+		return this->size() - 1;
 	}
 
-	void genome::add_dummy_cell() {
-		cell_t dummy_cell;
+	void genome::add_dummy_gene() {
+		gene_t dummy_gene;
 
-		dummy_cell.type = GATE_DUMMY;
+		dummy_gene.type = DUMMY_GENE_TYPE;
 
-		this->add_cell(dummy_cell);
+		this->add_gene(dummy_gene);
 	}
 
-	int genome::size() {
+	unsigned genome::size() {
 		return this->chromosome.size();
 	}
 
-	void genome::update_cell(cell_t cell) {
-		this->chromosome[cell.id] = cell.gene;
-		this->env[cell.id]        = cell.type;
+	void genome::update_gene(io_id_t pos, gene_t gene) {
+		this->chromosome[pos] = gene;
 	}
 
-	bool genome::order(std::map<int, void*> inputs, std::map<int, void*> outputs) {
+	bool genome::order(std::map<io_id_t, void*> inputs, std::map<io_id_t, void*> outputs) {
 		//clear input/output maps
 		this->wire_in.clear();
 		this->wire_out.clear();
 
 		//fisrt inputs on top
-		int id = 0;
+		io_id_t id = 0;
 		while (inputs.size()) {
 
 			auto input = inputs.begin();
 
-			this->swap_id(input->first, id);
+			this->swap_genes(input->first, id);
 			this->wire_in[id] = input->second;
 
 			//swap in inputs
@@ -109,21 +97,21 @@ namespace genome {
 		this->last_input = id - 1;
 
 		//now sort others gates
-		int only_inputs_to = this->last_input;
+		io_id_t only_inputs_to = this->last_input;
 		while (id < this->size()) {
 
-			int to_swap = -1;
+			io_id_t to_swap;
+			bool    do_swap = false;
 			for (auto i = id; i < this->size(); i++) {
 				if (this->chromosome[i].I1 <= only_inputs_to && 
-				    this->chromosome[i].I2 <= only_inputs_to &&
-					this->chromosome[i].I3 <= only_inputs_to &&
-					this->chromosome[i].I4 <= only_inputs_to) {
+				    this->chromosome[i].I2 <= only_inputs_to) {
 						to_swap = i;
+						do_swap = true;
 						break;
 					}
 			}
 
-			if (to_swap == -1) {
+			if (!do_swap) {
 				if (id > (only_inputs_to + 1)) {
 					only_inputs_to++;
 					continue;
@@ -133,7 +121,7 @@ namespace genome {
 				return false;
 			}
 
-			this->swap_id(id, to_swap);
+			this->swap_genes(id, to_swap);
 
 			//outputs mapping fix
 			if (outputs.count(id) && outputs.count(to_swap)) {
@@ -167,15 +155,7 @@ namespace genome {
 		log("chromosome: [ ");
 
 		for (auto gene: this->chromosome) {
-			log(" %d %d %d %d    ", gene.I1, gene.I2, gene.I3, gene.I4);
-		}
-
-		log("]\n\n");
-
-		log("env: [ ");
-		
-		for (auto enviroment : this->env) {
-			log(" %d    ", enviroment);
+			log("[%" PRIu16 ",%" PRIu32 ",%" PRIu32 "]", gene.type, gene.I1, gene.I2);
 		}
 
 		log("]\n\n");
@@ -183,13 +163,7 @@ namespace genome {
 		log("last input %d\n", this->last_input);
 	}
 
-	cell_t genome::get_cell(int id) {
-		cell_t cell;
-
-		cell.gene   = this->chromosome[id];
-		cell.type   = this->env[id];
-		cell.id     = id;
-
-		return cell;
+	gene_t genome::get_gene(io_id_t id) {
+		return this->chromosome[id];
 	}
 }

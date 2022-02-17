@@ -16,6 +16,9 @@
 #include <map>
 #include <set>
 
+//representations
+#include "aig.h"
+
 USING_YOSYS_NAMESPACE
 PRIVATE_NAMESPACE_BEGIN
 
@@ -45,15 +48,16 @@ struct cgploss : public Pass {
 
 		/* CGP Code */
 		auto chromosome = new genome::genome();
+		auto repres     = new representation::aig(chromosome);
 
-		auto map = design2genome(design, chromosome);
+		auto map = design2genome(design, repres);
 
 		if (!wire_test) {
 			//CGP CODE
 			chromosome->print(log);
 		}
 
-		genome2design(chromosome, design);
+		//genome2design(chromosome, design);
 
 	}
 

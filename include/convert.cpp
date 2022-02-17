@@ -5,8 +5,8 @@
  */
 
 typedef struct mapper {
-	std::map<RTLIL::SigBit, int> signal_map;
-    std::map<int, void*> in, out;
+	std::map<RTLIL::SigBit, genome::io_id_t> signal_map;
+    std::map<genome::io_id_t, void*> in, out;
 } mapper_t;
 
 /**
@@ -28,7 +28,7 @@ int map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, 
             mapper->in[chromosome->size()]  = bit.wire;
         }
 
-        chromosome->add_dummy_cell();
+        chromosome->add_dummy_gene();
 
 	} else {
         if (output) {
@@ -42,86 +42,48 @@ int map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, 
 }
 
 /**
- * Get type of RTLIL cell in genome type
- * @param cell RTLIL::Cell* cell in RTLIL reprezentation
- * @return genome::gates_types_t
- */
-genome::gates_types_t rtlil2genome_type(RTLIL::Cell* cell) {
-    if (cell->type == ID($_AND_))
-		return genome::GATE_AND;
-	else if (cell->type == ID($_NAND_))
-		return genome::GATE_NAND;
-	else if (cell->type == ID($_OR_))
-		return genome::GATE_OR;
-	else if (cell->type == ID($_NOR_))
-		return genome::GATE_NOR;
-	else if (cell->type == ID($_XOR_))
-		return genome::GATE_XOR;
-	else if (cell->type == ID($_XNOR_))
-		return genome::GATE_XNOR;
-	else if (cell->type == ID($_ANDNOT_))
-		return genome::GATE_ANDNOT;
-	else if (cell->type == ID($_ORNOT_))
-		return genome::GATE_ORNOT;
-    else if (cell->type == ID($_NOT_))
-        return genome::GATE_NOT;
-    else if (cell->type == ID($_BUF_))
-        return genome::GATE_BUF;
-    else if (cell->type == ID($_AOI3_))
-        return genome::GATE_AOI3;
-    else if (cell->type == ID($_OAI3_))
-        return genome::GATE_OAI3;
-    else if (cell->type == ID($_AOI4_))
-        return genome::GATE_AOI4;
-    else if (cell->type == ID($_OAI4_))
-        return genome::GATE_OAI4;
-	else
-		log_abort();
-}
-
-/**
- * Map rtlil cell output to GENE part
+ * Map rtlil cell output to GENE
  * @param cell RTLIL::Cell* cell in RTLIL reprezentation
  * @param chromosome is chromosome where signal is maped as gene or going to by map
  * @param mapper mapper with RTLIL>GENE signal maps
- * @return int id of output in chromosome (PART OF GENE)
+ * @return io_id_t id of output in chromosome (PART OF GENE)
  */
-int rtlil2genome_out(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
+genome::io_id_t rtlil2genome_out(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
     auto sig_y = cell->getPort(ID::Y);
     return map_signal(sig_y, mapper, chromosome, true);
 }
 
 
 /**
- * Convert rtlil cell to cell gene
+ * Map rtl cell inputs to chromosome
  * @param cell RTLIL::Cell* cell in RTLIL reprezentation
  * @param chromosome is chromosome where signal is maped as gene or going to by map
  * @param mapper mapper with RTLIL>GENE signal maps
- * @return genome::cell_gene_t (part of chromosome) must be added to chromosome manualy
+ * @return std::vector<io_id_t> of inputs IDs
  */
-genome::cell_gene_t rtlil2genome_gene(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
-	genome::cell_gene_t gene;
+std::vector<genome::io_id_t> rtlil2genome_inputs(RTLIL::Cell* cell, genome::genome *chromosome, mapper_t *mapper) {
+	std::vector<genome::io_id_t> inputs;
 
     if (cell->type.in(ID($_BUF_), ID($_NOT_))) {
 		auto sig_a = cell->getPort(ID::A);
         
-        gene.I1 = map_signal(sig_a, mapper, chromosome);
+        inputs.push_back(map_signal(sig_a, mapper, chromosome));
 
 	} else if (cell->type.in(ID($_AND_), ID($_NAND_), ID($_OR_), ID($_NOR_), ID($_XOR_), ID($_XNOR_), ID($_ANDNOT_), ID($_ORNOT_))) {
 		auto sig_a = cell->getPort(ID::A);
 		auto sig_b = cell->getPort(ID::B);
 
-		gene.I1 = map_signal(sig_a, mapper, chromosome);
-		gene.I2 = map_signal(sig_b, mapper, chromosome);
+		inputs.push_back(map_signal(sig_a, mapper, chromosome));
+		inputs.push_back(map_signal(sig_b, mapper, chromosome));
 
 	} else if (cell->type.in(ID($_AOI3_), ID($_OAI3_))) {
 		auto sig_a = cell->getPort(ID::A);
 		auto sig_b = cell->getPort(ID::B);
 		auto sig_c = cell->getPort(ID::C);
 
-		gene.I1 = map_signal(sig_a, mapper, chromosome);
-		gene.I2 = map_signal(sig_b, mapper, chromosome);
-		gene.I3 = map_signal(sig_c, mapper, chromosome);
+		inputs.push_back(map_signal(sig_a, mapper, chromosome));
+		inputs.push_back(map_signal(sig_b, mapper, chromosome));
+		inputs.push_back(map_signal(sig_c, mapper, chromosome));
 
 	} else if (cell->type.in(ID($_AOI4_), ID($_OAI4_))) {
 		auto sig_a = cell->getPort(ID::A);
@@ -129,13 +91,13 @@ genome::cell_gene_t rtlil2genome_gene(RTLIL::Cell* cell, genome::genome *chromos
 		auto sig_c = cell->getPort(ID::C);
 		auto sig_d = cell->getPort(ID::D);
 
-		gene.I1 = map_signal(sig_a, mapper, chromosome);
-		gene.I2 = map_signal(sig_b, mapper, chromosome);
-		gene.I3 = map_signal(sig_c, mapper, chromosome);
-		gene.I4 = map_signal(sig_d, mapper, chromosome);
+		inputs.push_back(map_signal(sig_a, mapper, chromosome));
+		inputs.push_back(map_signal(sig_b, mapper, chromosome));
+		inputs.push_back(map_signal(sig_c, mapper, chromosome));
+		inputs.push_back(map_signal(sig_d, mapper, chromosome));
 	}
 
-	return gene;
+	return inputs;
 }
 
 /**
@@ -145,118 +107,11 @@ genome::cell_gene_t rtlil2genome_gene(RTLIL::Cell* cell, genome::genome *chromos
  * @param mapper mapper with RTLIL>GENE signal maps
  * @return genome::cell_gene_t (part of chromosome) must be added to chromosome manualy
  */
-void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, genome::genome *chromosome, mapper_t *mapper) {
-	genome::cell_t chromosome_cell;
+void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, representation::representation *repres, mapper_t *mapper) {
+	auto output = rtlil2genome_out(rtlil_cell, repres->chromosome, mapper);
+	auto inputs = rtlil2genome_inputs(rtlil_cell, repres->chromosome, mapper);
 
-	chromosome_cell.type   = rtlil2genome_type(rtlil_cell);
-    chromosome_cell.id     = rtlil2genome_out(rtlil_cell, chromosome, mapper);
-	chromosome_cell.gene   = rtlil2genome_gene(rtlil_cell, chromosome, mapper);
-
-	chromosome->update_cell(chromosome_cell);
-}
-
-/**
- * Convert chromosome to RTLIL reprezentation
- * Same basic od adding RTLIL cell, etc. is in: http://www.clifford.at/yosys/files/yosys_presentation.pdf
- * @param chromosome is chromosome what goting to be convert to rtllil reprezentation
- * @param design is design where RTLIL reprezenation be strored
- */
-void genome2design(genome::genome *chromosome, Design* design) {
-	std::map<int, RTLIL::Wire*> assign_map;
-	auto mod = design->selected_modules()[0];
-
-	//map inputs
-	for (auto input = chromosome->wire_in.begin(); input != chromosome->wire_in.end(); input++) {
-		assign_map[input->first] = (RTLIL::Wire *) input->second;
-	}
-
-	//map outputs
-	for (auto output = chromosome->wire_out.begin(); output != chromosome->wire_out.end(); output++) {
-		assign_map[output->first] = (RTLIL::Wire *) output->second;
-	}
-
-	for (auto i = chromosome->last_input + 1; i < chromosome->size(); i++) {
-
-		auto cell = chromosome->get_cell(i);
-
-		RTLIL::Wire* y;
-		RTLIL::Cell *gate_cell = NULL;
-
-		if (assign_map.count(cell.id)) {
-			y = assign_map[cell.id];
-		} else {
-			y = mod->addWire("$cgploss_y_" + std::to_string(cell.id));
-			assign_map[cell.id] = y;
-		}
-
-		if (genome::I1Gates.count(cell.type)) {
-
-			if (cell.type == genome::GATE_NOT) {
-				gate_cell = mod->addCell(NEW_ID, "$_NOT_");
-			} else if (cell.type == genome::GATE_BUF) {
-				//mod->addBuf(NEW_ID, a, y);
-			}
-
-			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
-
-		} else if (genome::I2Gates.count(cell.type)) {
-
-			if (cell.type == genome::GATE_AND) {
-				gate_cell = mod->addCell(NEW_ID, "$_AND_");
-			} else if (cell.type == genome::GATE_NAND) {
-				gate_cell = mod->addCell(NEW_ID, "$_NAND_");
-			} else if (cell.type == genome::GATE_OR) {
-				gate_cell = mod->addCell(NEW_ID, "$_OR_");
-			} else if (cell.type == genome::GATE_NOR) {
-				gate_cell = mod->addCell(NEW_ID, "$_NOR_");
-			} else if (cell.type == genome::GATE_XOR) {
-				gate_cell = mod->addCell(NEW_ID, "$_XOR_");
-			} else if (cell.type == genome::GATE_XNOR) {
-				gate_cell = mod->addCell(NEW_ID, "$_XNOR_");
-			} else if (cell.type == genome::GATE_ANDNOT) {
-				gate_cell = mod->addCell(NEW_ID, "$_ANDNOT_");
-			} else if (cell.type == genome::GATE_ORNOT) {
-				gate_cell = mod->addCell(NEW_ID, "$_ORNOT_");
-			}
-
-			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
-			gate_cell->setPort(ID::B, assign_map[cell.gene.I2]);
-
-		} else if (genome::I3Gates.count(cell.type)) {
-
-			if (cell.type == genome::GATE_AOI3) {
-				gate_cell = mod->addCell(NEW_ID, "$_AOI3_");
-			} else if (cell.type == genome::GATE_OAI3) {
-				gate_cell = mod->addCell(NEW_ID, "$_OAI3_");
-			}
-
-			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
-			gate_cell->setPort(ID::B, assign_map[cell.gene.I2]);
-			gate_cell->setPort(ID::C, assign_map[cell.gene.I3]);
-
-		} else if (genome::I4Gates.count(cell.type)) {
-
-			if (cell.type == genome::GATE_AOI4) {
-				gate_cell = mod->addCell(NEW_ID, "$_AOI4_");
-			} else if (cell.type == genome::GATE_OAI4) {
-				gate_cell = mod->addCell(NEW_ID, "$_OAI4_");
-			}
-
-			gate_cell->setPort(ID::A, assign_map[cell.gene.I1]);
-			gate_cell->setPort(ID::B, assign_map[cell.gene.I2]);
-			gate_cell->setPort(ID::C, assign_map[cell.gene.I3]);
-			gate_cell->setPort(ID::D, assign_map[cell.gene.I4]);
-		}
-
-		if (gate_cell) {
-			gate_cell->setPort(ID::Y, y);
-		} else {
-			//error
-		}
-	}
-
-
-	mod->fixup_ports();
+	repres->add_cell(inputs, output);
 }
 
 /**
@@ -265,7 +120,7 @@ void genome2design(genome::genome *chromosome, Design* design) {
  * @param chromosome is chromosome where going to by stored created genes 
  * @param design is design what going to by converted to chromosome
  */
-mapper_t design2genome(Design* design, genome::genome *chromosome) {
+mapper_t design2genome(Design* design, representation::representation *repres) {
 	mapper_t mapper;
 
 	for (auto mod : design->selected_modules()) {
@@ -275,15 +130,15 @@ mapper_t design2genome(Design* design, genome::genome *chromosome) {
 		}
 
 		for (auto cell : mod->selected_cells()) {
-			rtlil2genome_cell(cell, chromosome, &mapper);
+			rtlil2genome_cell(cell, repres, &mapper);
 			mod->remove(cell); //delete cell in reprezentation
 
 		}
 
-		chromosome->order(mapper.in, mapper.out);
+		repres->chromosome->order(mapper.in, mapper.out);
 
 
-		log("%d readed LOGIC cells\n", chromosome->size());
+		log("%d readed LOGIC cells\n", repres->chromosome->size());
 	}
 
 	return mapper;
