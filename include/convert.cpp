@@ -95,6 +95,15 @@ std::vector<genome::io_id_t> rtlil2genome_inputs(RTLIL::Cell* cell, genome::geno
 		inputs.push_back(map_signal(sig_b, mapper, chromosome));
 		inputs.push_back(map_signal(sig_c, mapper, chromosome));
 		inputs.push_back(map_signal(sig_d, mapper, chromosome));
+
+	} else if (cell->type.in(ID($_MUX_), ID($_NMUX_))) {
+		auto sig_a = cell->getPort(ID::A);
+		auto sig_b = cell->getPort(ID::B);
+		auto sig_s = cell->getPort(ID::S);
+
+		inputs.push_back(map_signal(sig_a, mapper, chromosome));
+		inputs.push_back(map_signal(sig_b, mapper, chromosome));
+		inputs.push_back(map_signal(sig_s, mapper, chromosome));
 	}
 
 	return inputs;

@@ -1,4 +1,5 @@
-read_verilog tests/mux-load/code.v
+read_verilog tests/1badder-load/code.v
 techmap
+abc
 cgploss -wire_test
 write_verilog test_out.v

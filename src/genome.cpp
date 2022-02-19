@@ -41,6 +41,8 @@ namespace genome {
 		gene_t dummy_gene;
 
 		dummy_gene.type = DUMMY_GENE_TYPE;
+		dummy_gene.I1   = 0;
+		dummy_gene.I2   = 0;
 
 		this->add_gene(dummy_gene);
 	}
@@ -151,16 +153,16 @@ namespace genome {
 		return true;
 	}
 
-	void genome::print(void (*log)(const char* format, ...)) {
-		log("chromosome: [ ");
+	std::string genome::to_string() {
+		std::string  output = "\t\"chromosome\": [";
 
-		for (auto gene: this->chromosome) {
-			log("[%" PRIu16 ",%" PRIu32 ",%" PRIu32 "]", gene.type, gene.I1, gene.I2);
+		for (unsigned i = this->last_input + 1; i < this->size(); i++) {
+			auto gene = this->chromosome[i];
+			output += "\n\t\t[" + std::to_string(gene.type) + "," + std::to_string(gene.I1) + "," + std::to_string(gene.I2) + "],";
 		}
+		output.pop_back();
 
-		log("]\n\n");
-
-		log("last input %d\n", this->last_input);
+		return output + "\n\t]";
 	}
 
 	gene_t genome::get_gene(io_id_t id) {

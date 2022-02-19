@@ -15,6 +15,9 @@
 #include <string>
 #include <map>
 #include <set>
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
 
 //representations
 #include "aig.h"
@@ -50,14 +53,21 @@ struct cgploss : public Pass {
 		auto chromosome = new genome::genome();
 		auto repres     = new representation::aig(chromosome);
 
-		auto map = design2genome(design, repres);
+		try {
+			auto map = design2genome(design, repres);
 
-		if (!wire_test) {
+		//if (!wire_test) {
 			//CGP CODE
-			chromosome->print(log);
-		}
+			std::ofstream myfile;
+			myfile.open ("example.txt");
+			repres->save(myfile);
+			myfile.close();
+		//}
 
 		//genome2design(chromosome, design);
+		}catch( const std::invalid_argument& e ) {
+    log("error");
+}
 
 	}
 

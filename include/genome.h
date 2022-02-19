@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <vector>
 #include <map>
 #include <set>
@@ -71,7 +72,7 @@ namespace genome {
 			 * Print chromosome on stdout (DEBUG)
 			 * @param printer function with print string to stdout
 			 */
-			void   print(void (*printer)(const char* format, ...));
+			std::string  to_string();
 			
 			/**
 			 * Get gene on position
