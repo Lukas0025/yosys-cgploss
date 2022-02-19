@@ -17,7 +17,22 @@ typedef struct mapper {
  * @param output bool is this signal output of gate
  * @return int id of Gene
  */
-int map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, bool output = false) {
+genome::io_id_t map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, bool output = false) {
+	
+	/**
+	 * Constants mapping
+	 */
+	if (bit == RTLIL::State::S0) {
+		return 0;
+	}
+
+	if (bit == RTLIL::State::S1) {
+		return 1;
+	}
+
+	/**
+	 * Wires mapping
+	 */
 	if (mapper->signal_map.count(bit) == 0) {
 
 		mapper->signal_map[bit] = chromosome->size();
@@ -133,6 +148,9 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 	mapper_t mapper;
 
 	for (auto mod : design->selected_modules()) {
+		
+		mod->fixup_ports();
+
 		if (mod->processes.size() > 0) {
 			log("Skipping module %s because it contains processes.\n", log_id(mod));
 			continue;
@@ -143,12 +161,11 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 			mod->remove(cell); //delete cell in reprezentation
 
 		}
-
-		repres->chromosome->order(mapper.in, mapper.out);
-
-
-		log("%d readed LOGIC cells\n", repres->chromosome->size());
 	}
+
+	repres->chromosome->order(mapper.in, mapper.out);
+	
+	log("%d readed LOGIC cells\n", repres->chromosome->size());
 
 	return mapper;
 }

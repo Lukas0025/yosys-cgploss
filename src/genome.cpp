@@ -9,7 +9,9 @@
 
 namespace genome {
 	genome::genome() {
-
+		//insert logic 1 and 0 to inputs
+		this->add_dummy_gene(); //log 0
+		this->add_dummy_gene(); //log 1
 	}
 
 	void genome::swap_genes(io_id_t id_a, io_id_t id_b) {
@@ -41,8 +43,8 @@ namespace genome {
 		gene_t dummy_gene;
 
 		dummy_gene.type = DUMMY_GENE_TYPE;
-		dummy_gene.I1   = 0;
-		dummy_gene.I2   = 0;
+		dummy_gene.I1   = 999999999;
+		dummy_gene.I2   = 999999999;
 
 		this->add_gene(dummy_gene);
 	}
@@ -61,7 +63,7 @@ namespace genome {
 		this->wire_out.clear();
 
 		//fisrt inputs on top
-		io_id_t id = 0;
+		io_id_t id = 2; // for const inputs
 		while (inputs.size()) {
 
 			auto input = inputs.begin();
@@ -160,7 +162,10 @@ namespace genome {
 			auto gene = this->chromosome[i];
 			output += "\n\t\t[" + std::to_string(gene.type) + "," + std::to_string(gene.I1) + "," + std::to_string(gene.I2) + "],";
 		}
-		output.pop_back();
+
+		if (this->last_input + 1 < this->size()) { //for 0 gates
+			output.pop_back();
+		}
 
 		return output + "\n\t]";
 	}
