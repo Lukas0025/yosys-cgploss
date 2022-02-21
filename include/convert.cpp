@@ -6,6 +6,7 @@
 
 typedef struct mapper {
 	std::map<RTLIL::SigBit, genome::io_id_t> signal_map;
+	std::map<RTLIL::SigBit, RTLIL::SigBit>   connections;
     std::map<genome::io_id_t, void*> in, out;
 } mapper_t;
 
@@ -31,6 +32,14 @@ genome::io_id_t map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *
 	}
 
 	/**
+	 * Connection mapping
+	 */
+
+	if (mapper->connections.count(bit) != 0) {
+		bit = mapper->connections[bit];
+	}
+
+	/**
 	 * Wires mapping
 	 */
 	if (mapper->signal_map.count(bit) == 0) {
@@ -38,7 +47,7 @@ genome::io_id_t map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *
 		mapper->signal_map[bit] = chromosome->size();
 		
         if (output) {
-            mapper->out[chromosome->size()] = bit.wire;
+			mapper->out[chromosome->size()] = bit.wire;
         } else {
             mapper->in[chromosome->size()]  = bit.wire;
         }
@@ -138,6 +147,45 @@ void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, representation::representation *
 	repres->add_cell(rtlil_cell->type, inputs, output);
 }
 
+void connection_mapping(RTLIL::Module* mod, mapper_t *mapper) {
+	std::vector<RTLIL::SigBit> conn_first, conn_second;
+
+	//convert connections to vectors
+	for (auto conn : mod->connections_) {
+		for (auto sigbit : conn.first) {
+			conn_first.push_back(sigbit);
+		}
+
+		for (auto sigbit : conn.second) {
+			conn_second.push_back(sigbit);
+		}
+	}
+
+	//now create clusters
+	for (unsigned i = 0; i < conn_first.size(); i++) {
+		for (unsigned j = 0; j < conn_first.size(); j++) {
+			if (conn_first[i] != conn_first[j]) {
+				
+				if (conn_second[i] == conn_first[j]) {
+					conn_first[j] = conn_first[i];
+				}
+
+				if (conn_second[i] == conn_second[j]) {
+					std::swap(conn_second[j], conn_first[j]);
+					conn_first[j] = conn_first[i];
+				}
+
+			}
+		}
+	}
+
+	//now create map
+	for (unsigned i = 0; i < conn_first.size(); i++) {
+		mapper->connections[conn_second[i]] = conn_first[i];
+	}
+
+}
+
 /**
  * Convert RTLIL reprezentation to chromosome
  * Same basic is in: ABC
@@ -156,16 +204,51 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 			continue;
 		}
 
+		// map conections
+		connection_mapping(mod, &mapper);
+
 		for (auto cell : mod->selected_cells()) {
 			rtlil2genome_cell(cell, repres, &mapper);
 			mod->remove(cell); //delete cell in reprezentation
-
 		}
+
+
+
+		//clean up chromosome outputs
+		std::vector<genome::io_id_t> to_del;
+		for (auto wire : mapper.out) {
+
+			if (((RTLIL::Wire *) wire.second)->port_output) {
+				log("ok");
+				continue;
+			}
+
+			bool found = false;
+			for (auto conn : mapper.connections) {
+				if (conn.second.wire == wire.second) {
+					if (conn.first.wire->port_output) {
+						log("ok");
+						found = true;
+						break;
+					}
+				}
+			}
+
+			if (found) continue;
+
+			log("deleting wire %s from chromosome\n", ((RTLIL::Wire *) wire.second)->name.c_str());
+			to_del.push_back(wire.first);
+		}
+
+		for (auto wire : to_del) {
+			mapper.out.erase(wire);
+		}
+
 	}
 
 	repres->chromosome->order(mapper.in, mapper.out);
 	
-	log("%d readed LOGIC cells\n", repres->chromosome->size());
+	//log("cgploss: loaded chromosome with %d gens, %d inputs and %d outputs\n", repres->chromosome->size(), in_wires.size(), out_wires.size());
 
 	return mapper;
 }
