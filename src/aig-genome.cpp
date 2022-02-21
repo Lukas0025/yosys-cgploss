@@ -21,7 +21,7 @@ namespace representation {
 		if (type == ID($_MUX_))    return this->add_mux(inputs, output);
 		if (type == ID($_NMUX_))   return this->add_nmux(inputs, output);
 
-		throw std::runtime_error("invalid gate type");
+		throw std::runtime_error("invalid gate type in RTLIL");
 
 	}
 
@@ -100,6 +100,4 @@ namespace representation {
 
 		return this->update_aig_gate(output, 0b111, nor_g, and_g);
 	}
-
-
 }

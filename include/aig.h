@@ -28,6 +28,8 @@ namespace representation {
 			 * @return genome::io_id_t id of output
 			 */
 			genome::io_id_t add_cell(Yosys::RTLIL::IdString type, std::vector<genome::io_id_t> inputs, genome::io_id_t output);
+
+			Yosys::RTLIL::Cell *get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace);
 			
 			/**
 			 * @brief Get name of parts in genome
@@ -120,5 +122,14 @@ namespace representation {
 			 * @return output id of gate 0bA00
 			 */
 			genome::io_id_t update_aig_gate(genome::io_id_t id, uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
+
+			Yosys::RTLIL::Cell* rtlil_add_and(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_nand(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_or(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_nor(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_andnota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell* rtlil_add_ornota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell* rtlil_add_andnot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_ornot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
 	};
 }

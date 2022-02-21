@@ -219,7 +219,6 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 		for (auto wire : mapper.out) {
 
 			if (((RTLIL::Wire *) wire.second)->port_output) {
-				log("ok");
 				continue;
 			}
 
@@ -227,7 +226,6 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 			for (auto conn : mapper.connections) {
 				if (conn.second.wire == wire.second) {
 					if (conn.first.wire->port_output) {
-						log("ok");
 						found = true;
 						break;
 					}
@@ -236,7 +234,7 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 
 			if (found) continue;
 
-			log("deleting wire %s from chromosome\n", ((RTLIL::Wire *) wire.second)->name.c_str());
+			log("cgploss load: deleting output wire %u - %s from chromosome\n", wire.first, ((RTLIL::Wire *) wire.second)->name.c_str());
 			to_del.push_back(wire.first);
 		}
 
@@ -248,7 +246,45 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 
 	repres->chromosome->order(mapper.in, mapper.out);
 	
-	//log("cgploss: loaded chromosome with %d gens, %d inputs and %d outputs\n", repres->chromosome->size(), in_wires.size(), out_wires.size());
+	log("cgploss load: loaded chromosome with %u gens, %lu inputs and %lu outputs\n", repres->chromosome->size(), mapper.in.size(), mapper.out.size());
 
 	return mapper;
+}
+
+/**
+ * Convert chromosome to RTLIL reprezentation
+ * Same basic od adding RTLIL cell, etc. is in: http://www.clifford.at/yosys/files/yosys_presentation.pdf
+ * @param chromosome is chromosome what goting to be convert to rtllil reprezentation
+ * @param design is design where RTLIL reprezenation be strored
+ */
+void genome2design(representation::representation *repres, Design* design) {
+	std::map<int, RTLIL::Wire*> assign_map;
+	auto mod = design->selected_modules()[0];
+
+	//map inputs
+	for (auto input = repres->chromosome->wire_in.begin(); input != repres->chromosome->wire_in.end(); input++) {
+		assign_map[input->first] = (RTLIL::Wire *) input->second;
+	}
+
+	//map outputs
+	for (auto output = repres->chromosome->wire_out.begin(); output != repres->chromosome->wire_out.end(); output++) {
+		assign_map[output->first] = (RTLIL::Wire *) output->second;
+	}
+
+	for (auto id = repres->chromosome->last_input + 1; id < repres->chromosome->size(); id++) {
+
+		//map output if is not mapped
+		if (!assign_map.count(id)) {
+			assign_map[id] = mod->addWire("$cgploss_y_" + std::to_string(id));
+		}
+
+		auto gate_cell = repres->get_rtlil(id, mod, assign_map, "$cgploss_inner_" + std::to_string(id) + "_");
+
+		if (!gate_cell) {
+			throw std::runtime_error("fail to create gate from chromosome");
+		}
+	}
+
+
+	mod->fixup_ports();
 }

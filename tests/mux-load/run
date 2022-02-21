@@ -1,4 +1,4 @@
 read_verilog tests/mux-load/code.v
 techmap
-cgploss -wire_test
+cgploss -aig -wire_test
 write_verilog test_out.v

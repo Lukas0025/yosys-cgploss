@@ -56,18 +56,18 @@ struct cgploss : public Pass {
 		try {
 			auto map = design2genome(design, repres);
 
-		//if (!wire_test) {
-			//CGP CODE
-			std::ofstream myfile;
-			myfile.open ("example.txt");
-			repres->save(myfile);
-			myfile.close();
-		//}
-
-		//genome2design(chromosome, design);
-		}catch( const std::invalid_argument& e ) {
-    log("error");
-}
+			if (!wire_test) {
+				//CGP CODE
+				std::ofstream myfile;
+				myfile.open ("example.txt");
+				repres->save(myfile);
+				myfile.close();
+			}
+			
+			genome2design(repres, design);
+		} catch( const std::invalid_argument& e ) {
+			log("error");
+		}
 
 	}
 
