@@ -5,7 +5,6 @@
  */
 
 #include "genome.h"
-#include "inttypes.h"
 
 namespace genome {
 	genome::genome() {
