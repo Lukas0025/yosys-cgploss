@@ -19,7 +19,14 @@ typedef struct mapper {
  * @return int id of Gene
  */
 genome::io_id_t map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *chromosome, bool output = false) {
-	
+	/**
+	 * Connection mapping
+	 */
+
+	if (mapper->connections.count(bit) != 0) {
+		bit = mapper->connections[bit];
+	}
+
 	/**
 	 * Constants mapping
 	 */
@@ -31,13 +38,6 @@ genome::io_id_t map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *
 		return 1;
 	}
 
-	/**
-	 * Connection mapping
-	 */
-
-	if (mapper->connections.count(bit) != 0) {
-		bit = mapper->connections[bit];
-	}
 
 	/**
 	 * Wires mapping
@@ -179,6 +179,23 @@ void connection_mapping(RTLIL::Module* mod, mapper_t *mapper) {
 		}
 	}
 
+	//if exist i/o skip to
+	for (unsigned i = 0; i < conn_first.size(); i++) {
+		if (conn_second[i] == RTLIL::State::S0 || conn_second[i] == RTLIL::State::S1 || 
+		    conn_second[i].wire->port_output || conn_second[i].wire->port_input) {
+
+			std::swap(conn_second[i], conn_first[i]);
+
+			for (unsigned j = 0; j < conn_first.size(); j++) {
+				if (conn_second[i] == conn_first[j]) {
+					conn_first[j] = conn_first[i];
+				}
+			}
+
+		}
+	}
+
+
 	//now create map
 	for (unsigned i = 0; i < conn_first.size(); i++) {
 		mapper->connections[conn_second[i]] = conn_first[i];
@@ -196,8 +213,6 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 	mapper_t mapper;
 
 	for (auto mod : design->selected_modules()) {
-		
-		mod->fixup_ports();
 
 		if (mod->processes.size() > 0) {
 			log("Skipping module %s because it contains processes.\n", log_id(mod));
@@ -221,18 +236,6 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 			if (((RTLIL::Wire *) wire.second)->port_output) {
 				continue;
 			}
-
-			bool found = false;
-			for (auto conn : mapper.connections) {
-				if (conn.second.wire == wire.second) {
-					if (conn.first.wire->port_output) {
-						found = true;
-						break;
-					}
-				}
-			}
-
-			if (found) continue;
 
 			log("cgploss load: deleting output wire %u - %s from chromosome\n", wire.first, ((RTLIL::Wire *) wire.second)->name.c_str());
 			to_del.push_back(wire.first);
