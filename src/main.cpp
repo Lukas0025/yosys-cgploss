@@ -41,12 +41,12 @@ struct cgploss : public Pass {
 
 		/* Params parsing */
 		bool wire_test = false;
-		for (int i = 1; i < params.size(); i++) {
-			std::string param = params[i];
-
+		for (auto param : params) {
+			
 			if (param == "-wire-test") {
 				wire_test = true;
 			}
+
 		}
 
 		/* CGP Code */

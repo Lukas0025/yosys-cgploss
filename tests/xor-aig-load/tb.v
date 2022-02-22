@@ -7,7 +7,7 @@ module xor_gate_tb;
   reg a, b;
   wire c;
   
-  xor_gate UUT(
+  xorgate UUT(
     .a(a), 
     .b(b),
     .c(c)
