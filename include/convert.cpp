@@ -147,6 +147,11 @@ void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, representation::representation *
 	repres->add_cell(rtlil_cell->type, inputs, output);
 }
 
+/**
+ * @brief Create map for sigbit from connections in module
+ * @param module rtlil module
+ * @param mapper rtlil to genome mapper
+ */
 void connection_mapping(RTLIL::Module* mod, mapper_t *mapper) {
 	std::vector<RTLIL::SigBit> conn_first, conn_second;
 
@@ -201,6 +206,9 @@ void connection_mapping(RTLIL::Module* mod, mapper_t *mapper) {
 		mapper->connections[conn_second[i]] = conn_first[i];
 	}
 
+	//now remove all conections
+	mod->connections_.clear();
+
 }
 
 /**
@@ -244,7 +252,6 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 		for (auto wire : to_del) {
 			mapper.out.erase(wire);
 		}
-
 	}
 
 	repres->chromosome->order(mapper.in, mapper.out);

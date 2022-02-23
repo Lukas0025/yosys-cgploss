@@ -1,4 +1,4 @@
-read_verilog tests/8badder-load/code.v
+read_verilog tests/all-gates-aig-load/code.v
 techmap
 abc
 cgploss -aig -wire_test

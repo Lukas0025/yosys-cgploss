@@ -1,3 +1,9 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with aig rtlil2genome inmplemenation
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
 #include "aig.h"
 #include <stdexcept>
 

@@ -1,3 +1,9 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with aig genome2rtlil inmplemenation
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
 #include "aig.h"
 #include <stdexcept>
 
@@ -14,7 +20,7 @@ namespace representation {
 		if (gene.type == SAFE_TYPE_ID(0b110)) return this->rtlil_add_ornota(id, mod, assign_map, wire_namespace);
 		if (gene.type == SAFE_TYPE_ID(0b111)) return this->rtlil_add_or(id, mod, assign_map);
 
-		return NULL;
+		throw std::runtime_error("invalid gate type in genome");
 	}
 
 	Yosys::RTLIL::Cell* aig::rtlil_add_andnota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace) {
@@ -101,7 +107,7 @@ namespace representation {
 		if (gene.I1 == gene.I2) {
 			gate_cell = mod->addCell(NEW_ID, "$_NOT_");
 		} else {
-			gate_cell = mod->addCell(NEW_ID, "$_AND_");
+			gate_cell = mod->addCell(NEW_ID, "$_NAND_");
 			this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
 		}
 		
