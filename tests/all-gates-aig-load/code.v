@@ -19,8 +19,8 @@ module allgates ( input a,
                   output nmux_o,
                );
    assign not_o    =   ~a;  
-   assign and_o    =    a  &  b;  
-   assign nand_o   = ~( a  &  b);  
+   assign and_o    =    a  &  b; 
+   assign nand_o   = ~( a  &  b);
    assign andnot_o =    a  & ~b;
    assign or_o     =    a  |  b;
    assign nor_o    = ~( a  |  b);

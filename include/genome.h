@@ -73,6 +73,8 @@ namespace genome {
 			 * @param printer function with print string to stdout
 			 */
 			std::string  to_string();
+
+			std::string raw_string();
 			
 			/**
 			 * Get gene on position

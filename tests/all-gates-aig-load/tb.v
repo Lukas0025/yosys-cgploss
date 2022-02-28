@@ -57,19 +57,19 @@ module allgates_tb;
 		#10
 
 		assert(not_exp === not_o);
-		/*assert(and_exp === and_o);
+		assert(and_exp === and_o);
 		assert(nand_exp === nand_o);
 		assert(andnot_exp === andnot_o);
 		assert(or_exp === or_o);
 		assert(nor_exp === nor_o);
 		assert(ornot_exp === ornot_o);
 		assert(xor_exp === xor_o);
-		assert(xnor_exp === xnor_o);*/
+		assert(xnor_exp === xnor_o);
 
-		//assert(oai3_exp === oai3_o);
-		//assert(aoi3_exp === aoi3_o);
-		//assert(oai4_exp === oai4_o);
-		//assert(aoi4_exp === aoi4_o);
+		assert(oai3_exp === oai3_o);
+		assert(aoi3_exp === aoi3_o);
+		assert(oai4_exp === oai4_o);
+		assert(aoi4_exp === aoi4_o);
     end
   end
 endmodule

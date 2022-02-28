@@ -8,6 +8,7 @@
 
 namespace genome {
 	genome::genome() {
+		this->chromosome.clear();
 		//insert logic 1 and 0 to inputs
 		this->add_dummy_gene(); //log 0
 		this->add_dummy_gene(); //log 1
@@ -80,7 +81,7 @@ namespace genome {
 			//swap in outputs
 			if (outputs.count(id) && outputs.count(input->first)) {
 
-				//std::swap(outputs.at(id), outputs.at(input->first));
+				std::swap(outputs.at(id), outputs.at(input->first));
 
 			} else if (outputs.count(id)) {
 
@@ -129,7 +130,7 @@ namespace genome {
 			//outputs mapping fix
 			if (outputs.count(id) && outputs.count(to_swap)) {
 
-				//std::swap(outputs.at(id), outputs.at(to_swap));
+				std::swap(outputs.at(id), outputs.at(to_swap));
 
 			} else if (outputs.count(id)) {
 
@@ -167,6 +168,23 @@ namespace genome {
 		}
 
 		return output + "\n\t]";
+	}
+
+	std::string genome::raw_string() {
+		
+		std::string  output = "[";
+
+		for (unsigned i = 0; i < this->size(); i++) {
+			auto gene = this->chromosome[i];
+			output += "[" + std::to_string(gene.type) + "," + std::to_string(gene.I1) + "," + std::to_string(gene.I2) + "],";
+		}
+
+		if (this->last_input + 1 < this->size()) { //for 0 gates
+			output.pop_back();
+		}
+
+		return output + "]";
+
 	}
 
 	gene_t genome::get_gene(io_id_t id) {
