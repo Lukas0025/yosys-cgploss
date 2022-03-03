@@ -5,9 +5,9 @@
  */
 
 typedef struct mapper {
-	std::map<RTLIL::SigBit, genome::io_id_t> signal_map;
-	std::map<RTLIL::SigBit, RTLIL::SigBit>   connections;
-    std::map<genome::io_id_t, void*> in, out;
+	std::map<RTLIL::SigBit,   genome::io_id_t> signal_map;
+	std::map<RTLIL::SigBit,   RTLIL::SigBit>   connections;
+    std::map<genome::io_id_t, RTLIL::SigBit>   in, out;
 } mapper_t;
 
 /**
@@ -47,9 +47,9 @@ genome::io_id_t map_signal(RTLIL::SigBit bit, mapper_t *mapper, genome::genome *
 		mapper->signal_map[bit] = chromosome->size();
 		
         if (output) {
-			mapper->out[chromosome->size()] = bit.wire;
+			mapper->out[chromosome->size()] = bit;
         } else {
-            mapper->in[chromosome->size()]  = bit.wire;
+            mapper->in[chromosome->size()] = bit;
         }
 
         chromosome->add_dummy_gene();
@@ -239,18 +239,18 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 
 		//clean up chromosome outputs
 		std::vector<genome::io_id_t> to_del;
-		for (auto wire : mapper.out) {
+		for (auto output : mapper.out) {
 
-			if (((RTLIL::Wire *) wire.second)->port_output) {
+			if (output.second.wire->port_output) {
 				continue;
 			}
 
-			log("cgploss load: deleting output wire %u - %s from chromosome\n", wire.first, ((RTLIL::Wire *) wire.second)->name.c_str());
-			to_del.push_back(wire.first);
+			log("cgploss load: deleting output wire %u - %s from chromosome\n", output.first, output.second.wire->name.c_str());
+			to_del.push_back(output.first);
 		}
 
-		for (auto wire : to_del) {
-			mapper.out.erase(wire);
+		for (auto output : to_del) {
+			mapper.out.erase(output);
 		}
 	}
 
@@ -268,17 +268,17 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
  * @param design is design where RTLIL reprezenation be strored
  */
 void genome2design(representation::representation *repres, Design* design) {
-	std::map<int, RTLIL::Wire*> assign_map;
+	std::map<genome::io_id_t, Yosys::RTLIL::SigBit> assign_map;
 	auto mod = design->selected_modules()[0];
 
 	//map inputs
 	for (auto input = repres->chromosome->wire_in.begin(); input != repres->chromosome->wire_in.end(); input++) {
-		assign_map[input->first] = (RTLIL::Wire *) input->second;
+		assign_map[input->first] = input->second;
 	}
 
 	//map outputs
 	for (auto output = repres->chromosome->wire_out.begin(); output != repres->chromosome->wire_out.end(); output++) {
-		assign_map[output->first] = (RTLIL::Wire *) output->second;
+		assign_map[output->first] = output->second;
 	}
 
 	for (auto id = repres->chromosome->last_input + 1; id < repres->chromosome->size(); id++) {

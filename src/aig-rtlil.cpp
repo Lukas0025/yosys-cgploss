@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 namespace representation {
-	Yosys::RTLIL::Cell* aig::get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace) {
+	Yosys::RTLIL::Cell* aig::get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) {
 		auto gene = this->chromosome->get_gene(id);
 
 		if (gene.type == SAFE_TYPE_ID(0b000)) return this->rtlil_add_and(id, mod, assign_map);
@@ -23,7 +23,7 @@ namespace representation {
 		throw std::runtime_error("invalid gate type in genome");
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_andnota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_andnota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 
@@ -41,7 +41,7 @@ namespace representation {
 		return gate_cell;
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_ornota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_ornota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 
@@ -59,7 +59,7 @@ namespace representation {
 		return gate_cell;
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_andnot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_andnot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 		
@@ -71,7 +71,7 @@ namespace representation {
 		return gate_cell;
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_ornot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_ornot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 		
@@ -83,7 +83,7 @@ namespace representation {
 		return gate_cell;
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_and(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_and(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 
@@ -100,7 +100,7 @@ namespace representation {
 		return gate_cell;
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_nand(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_nand(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 
@@ -117,7 +117,7 @@ namespace representation {
 		return gate_cell;
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_or(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_or(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell = mod->addCell(NEW_ID, "$_OR_");
 
@@ -128,7 +128,7 @@ namespace representation {
 		return gate_cell;
 	}
 
-	Yosys::RTLIL::Cell* aig::rtlil_add_nor(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map) {
+	Yosys::RTLIL::Cell* aig::rtlil_add_nor(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell = mod->addCell(NEW_ID, "$_NOR_");
 

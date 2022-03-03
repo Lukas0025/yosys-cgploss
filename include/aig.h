@@ -43,7 +43,7 @@ namespace representation {
 			 * @param wire_namespace string namespace for new wires
 			 * @return poiter to created RTLIL::cell Last created
 			 */
-			Yosys::RTLIL::Cell *get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell *get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
 			
 			/**
 			 * @brief Get name of parts in genome
@@ -144,7 +144,7 @@ namespace representation {
 			 * @param assign_map map mapping genes id to wire pointer
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_and(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_and(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 			
 			/**
 			 * @brief Add nand gate from chromosome to module
@@ -153,7 +153,7 @@ namespace representation {
 			 * @param assign_map map mapping genes id to wire pointer
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_nand(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_nand(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 			
 			/**
 			 * @brief Add or gate from chromosome to module
@@ -162,7 +162,7 @@ namespace representation {
 			 * @param assign_map map mapping genes id to wire pointer
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_or(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_or(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 			
 			/**
 			 * @brief Add nor gate from chromosome to module
@@ -171,7 +171,7 @@ namespace representation {
 			 * @param assign_map map mapping genes id to wire pointer
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_nor(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_nor(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 			
 			/**
 			 * @brief Add !a and b gate from chromosome to module
@@ -181,7 +181,7 @@ namespace representation {
 			 * @param wire_namespace string namespace for new wires
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_andnota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell* rtlil_add_andnota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
 			
 			/**
 			 * @brief Add !a or b gate from chromosome to module
@@ -191,7 +191,7 @@ namespace representation {
 			 * @param wire_namespace string namespace for new wires
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_ornota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell* rtlil_add_ornota(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
 			
 			/**
 			 * @brief Add a and !b gate from chromosome to module
@@ -200,7 +200,7 @@ namespace representation {
 			 * @param assign_map map mapping genes id to wire pointer
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_andnot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_andnot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 			
 			/**
 			 * @brief Add a or !b gate from chromosome to module
@@ -209,6 +209,6 @@ namespace representation {
 			 * @param assign_map map mapping genes id to wire pointer
 			 * @return poiter to created RTLIL::cell
 			 */
-			Yosys::RTLIL::Cell* rtlil_add_ornot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map);
+			Yosys::RTLIL::Cell* rtlil_add_ornot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 	};
 }

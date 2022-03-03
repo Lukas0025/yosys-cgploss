@@ -24,13 +24,13 @@ namespace representation {
 
 			virtual genome::io_id_t add_cell(Yosys::RTLIL::IdString type, std::vector<genome::io_id_t> inputs, genome::io_id_t output) = 0;
 
-			virtual Yosys::RTLIL::Cell* get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<int, Yosys::RTLIL::Wire*> &assign_map, std::string wire_namespace) = 0;
+			virtual Yosys::RTLIL::Cell* get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) = 0;
 			
 			virtual std::string parts_naming() {
 				return "\"gate\": [\"none\"]";
 			}
 
-			void set_rtlil_port(Yosys::RTLIL::Cell* gate, Yosys::RTLIL::IdString port, genome::io_id_t genome_port, std::map<int, Yosys::RTLIL::Wire*> &assign_map) {
+			void set_rtlil_port(Yosys::RTLIL::Cell* gate, Yosys::RTLIL::IdString port, genome::io_id_t genome_port, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 				if (genome_port == 0) {
 					gate->setPort(port, Yosys::RTLIL::State::S0);
 				} else if (genome_port == 1) {

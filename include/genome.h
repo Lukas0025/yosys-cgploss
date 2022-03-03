@@ -13,6 +13,9 @@
 #include <set>
 #include <algorithm>
 
+#include "kernel/yosys.h"
+#include "kernel/sigtools.h"
+
 #define DUMMY_GENE_TYPE 0
 
 namespace genome {
@@ -66,7 +69,7 @@ namespace genome {
 			 * gene can have inputs only under self
 			 * @param inputs inputs map
 			 */
-			bool order(std::map<io_id_t, void*> inputs, std::map<io_id_t, void*> outputs);
+			bool order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs);
 
 			/**
 			 * Print chromosome on stdout (DEBUG)
@@ -91,7 +94,7 @@ namespace genome {
 			/**
 			 * map of input and output wires from RTLIL
 			 */
-			std::map<io_id_t, void*> wire_out, wire_in;
+			std::map<io_id_t, Yosys::RTLIL::SigBit> wire_out, wire_in;
 
 			/**
 			 * last gate in chromosome of type input

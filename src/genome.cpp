@@ -57,7 +57,7 @@ namespace genome {
 		this->chromosome[pos] = gene;
 	}
 
-	bool genome::order(std::map<io_id_t, void*> inputs, std::map<io_id_t, void*> outputs) {
+	bool genome::order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs) {
 		//clear input/output maps
 		this->wire_in.clear();
 		this->wire_out.clear();
