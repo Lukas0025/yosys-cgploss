@@ -15,6 +15,12 @@
 #include <string>
 #include <map>
 #include <set>
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
+
+//representations
+#include "aig.h"
 
 USING_YOSYS_NAMESPACE
 PRIVATE_NAMESPACE_BEGIN
@@ -35,25 +41,33 @@ struct cgploss : public Pass {
 
 		/* Params parsing */
 		bool wire_test = false;
-		for (int i = 1; i < params.size(); i++) {
-			std::string param = params[i];
-
+		for (auto param : params) {
+			
 			if (param == "-wire-test") {
 				wire_test = true;
 			}
+
 		}
 
 		/* CGP Code */
 		auto chromosome = new genome::genome();
+		auto repres     = new representation::aig(chromosome);
 
-		auto map = design2genome(design, chromosome);
+		try {
+			auto map = design2genome(design, repres);
 
-		if (!wire_test) {
-			//CGP CODE
-			chromosome->print(log);
+			if (!wire_test) {
+				//CGP CODE
+				std::ofstream myfile;
+				myfile.open ("example.txt");
+				repres->save(myfile);
+				myfile.close();
+			}
+			
+			genome2design(repres, design);
+		} catch( const std::invalid_argument& e ) {
+			log("error");
 		}
-
-		genome2design(chromosome, design);
 
 	}
 

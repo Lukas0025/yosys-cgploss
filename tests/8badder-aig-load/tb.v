@@ -25,7 +25,7 @@ module fulladder_tb;
     b    <= 0;
     c_in <= 0;
 
-    for (i = 0; i < 10; i = i + 1) begin
+    for (i = 0; i < 100; i = i + 1) begin
       a    <= $random;
       b    <= $random;    
       c_in <= $random;

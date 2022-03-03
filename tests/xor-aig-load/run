@@ -1,0 +1,4 @@
+read_verilog tests/xor-aig-load/code.v
+techmap
+cgploss -aig -wire_test
+write_verilog test_out.v
