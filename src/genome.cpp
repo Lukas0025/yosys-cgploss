@@ -5,6 +5,7 @@
  */
 
 #include "genome.h"
+#include <random>
 
 namespace genome {
 	genome::genome() {
@@ -31,6 +32,59 @@ namespace genome {
 		}
 
 		std::swap(this->chromosome[id_a], this->chromosome[id_b]);
+	}
+
+	unsigned genome::mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max) {
+		std::random_device                     rd{};
+		std::mt19937                           rand_gen{rd()};
+		std::normal_distribution<>             rand_numof_muts(center, sigma);
+		std::uniform_int_distribution<io_id_t> rand_mut_pos(this->last_input + 1, this->size() + this->wire_out.size() - 1);
+		std::uniform_int_distribution<io_id_t> rand_type(type_min, type_max);
+
+		int mutations = std::round(rand_numof_muts(rand_gen));
+		if (mutations <= 0) return 0; //no mutations
+
+		for (int mutation = 0; mutation < mutations; mutation++) {
+			io_id_t rand_pos = rand_mut_pos(rand_gen);
+
+			if (rand_pos >= this->size()) { //output mutation
+				//select random output
+				io_id_t i = 0;
+				for (auto output = this->wire_out.begin(); output != this->wire_out.end(); output++) {
+
+					if ((rand_pos - this->size()) == i) {
+						//generate random for output
+						std::uniform_int_distribution<io_id_t> rand_mut_outputs(this->last_input + 1, this->size() - 1);
+						auto rand_out = rand_mut_outputs(rand_gen);
+
+						if (this->wire_out.count(rand_out)) {
+							std::swap(this->wire_out.at(rand_out), this->wire_out.at(output->first));
+						} else {
+							this->wire_out[rand_out] = output->second;
+							this->wire_out.erase(output->first);
+						}
+
+						break;
+					}
+
+					i++;
+				}
+				
+			} else { //regular gene
+				auto mut_gene = this->get_gene_ptr(rand_pos);
+				
+				//generate random for gene inputs
+				std::uniform_int_distribution<io_id_t> rand_mut_inputs(0, rand_pos - 1);
+				
+				mut_gene->I1 = rand_mut_inputs(rand_gen);
+				mut_gene->I2 = rand_mut_inputs(rand_gen);
+
+				//type mutation
+				mut_gene->type = rand_type(rand_gen);
+			}
+		}
+
+		return mutations;
 	}
 
 	io_id_t genome::add_gene(gene_t gene) {

@@ -57,6 +57,9 @@ struct cgploss : public Pass {
 			auto map = design2genome(design, repres);
 
 			if (!wire_test) {
+
+				log("%d mutations", repres->mutate(10, 5));
+
 				//CGP CODE
 				std::ofstream myfile;
 				myfile.open ("example.txt");

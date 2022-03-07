@@ -28,6 +28,8 @@ namespace representation {
 			virtual Yosys::RTLIL::Cell* get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) = 0;
 
 			virtual void simulate(std::vector<simulation::io_t> &gates_o) = 0;
+
+			virtual unsigned mutate(unsigned center, unsigned sigma) = 0;
 			
 			virtual std::string parts_naming() {
 				return "\"gate\": [\"none\"]";

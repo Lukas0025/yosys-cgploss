@@ -65,6 +65,17 @@ namespace genome {
 			void update_gene(io_id_t pos, gene_t gene);
 
 			/**
+			 * Perform mutation on chromosome
+			 * 
+			 * @param center center of normal distribution of number of mutations
+			 * @param sigma sigma of normal distribution of number of mutations
+			 * @param type_min minimum ID of type of gene (for mutation)
+			 * @param type_max maximum ID of tzpe of gene (for mutation)
+			 * @return unsigned number of mutations
+			 */
+			unsigned mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max);
+
+			/**
 			 * Order genes in chromosome for CGP
 			 * gene can have inputs only under self
 			 * @param inputs inputs map
