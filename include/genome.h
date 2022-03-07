@@ -85,6 +85,8 @@ namespace genome {
 			 * @return cell_t
 			 */
 			gene_t get_gene(io_id_t pos);
+
+			gene_t* get_gene_ptr(io_id_t pos);
 			
 			/**
 			 * Chromosome

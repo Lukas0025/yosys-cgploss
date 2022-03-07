@@ -62,6 +62,16 @@ struct cgploss : public Pass {
 				myfile.open ("example.txt");
 				repres->save(myfile);
 				myfile.close();
+
+				std::vector<simulation::io_t> gates_out(repres->chromosome->size());
+
+				gates_out[0].byte[0] = 0;
+				gates_out[1].byte[0] = 255;
+
+				//simulation test
+				repres->simulate(gates_out);
+
+				log("%x\n", gates_out[4].byte[0]);
 			}
 			
 			genome2design(repres, design);

@@ -9,6 +9,7 @@
 #include "kernel/celltypes.h"
 
 #include "genome.h"
+#include "simulation.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -25,6 +26,8 @@ namespace representation {
 			virtual genome::io_id_t add_cell(Yosys::RTLIL::IdString type, std::vector<genome::io_id_t> inputs, genome::io_id_t output) = 0;
 
 			virtual Yosys::RTLIL::Cell* get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) = 0;
+
+			virtual void simulate(std::vector<simulation::io_t> &gates_o) = 0;
 			
 			virtual std::string parts_naming() {
 				return "\"gate\": [\"none\"]";

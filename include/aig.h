@@ -45,6 +45,8 @@ namespace representation {
 			 */
 			Yosys::RTLIL::Cell *get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
 			
+			void simulate(std::vector<simulation::io_t> &gates_o);
+
 			/**
 			 * @brief Get name of parts in genome
 			 * @return string 

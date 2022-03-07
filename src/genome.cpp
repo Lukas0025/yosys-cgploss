@@ -190,4 +190,8 @@ namespace genome {
 	gene_t genome::get_gene(io_id_t id) {
 		return this->chromosome[id];
 	}
+
+	gene_t* genome::get_gene_ptr(io_id_t id) {
+		return &(this->chromosome[id]);
+	}
 }
