@@ -23,6 +23,15 @@ namespace representation {
 				this->chromosome = chromosome;
 			}
 
+			representation(representation* repres) {
+				this->chromosome   = new genome::genome(repres->chromosome);
+				this->simulate     = repres->simulate;
+				this->add_cell     = repres->add_cell;
+				this->get_rtlil    = repres->get_rtlil;
+				this->mutate       = repres->mutate;
+				this->parts_naming = repres->parts_naming;
+			}
+
 			virtual genome::io_id_t add_cell(Yosys::RTLIL::IdString type, std::vector<genome::io_id_t> inputs, genome::io_id_t output) = 0;
 
 			virtual Yosys::RTLIL::Cell* get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) = 0;

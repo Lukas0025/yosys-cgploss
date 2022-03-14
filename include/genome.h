@@ -32,6 +32,8 @@ namespace genome {
 		public:
 			genome();
 
+			genome(genome *chromosome);
+
 			/**
 			 * Add gene to chromosome (On top)
 			 * @param gene to insert to chromosome
