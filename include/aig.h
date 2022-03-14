@@ -57,6 +57,25 @@ namespace representation {
 				return "\"gate\": [\"none\", \"A && B\", \"!A && B\", \"A && !B\", \"!A && !B\", \"!(A && B)\", \"!(!A && B)\", \"!(A && !B)\", \"!(!A && !B)\"]";
 			}
 
+			/**
+			 * @brief Add AIG gate to chromosome
+			 * @param type type of gate
+			 * @param I1 input 1 of gate 0b00A
+			 * @param I2 input 2 of gate 0b0A0
+			 * @return output id of gate 0bA00
+			 */
+			genome::io_id_t add_aig_gate(uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
+			
+			/**
+			 * @brief Update AIG gate in chromosome
+			 * @param id of gate (output id) 0bA00
+			 * @param type type of gate
+			 * @param I1 input 1 of gate 0b00A
+			 * @param I2 input 2 of gate 0b0A0
+			 * @return output id of gate 0bA00
+			 */
+			genome::io_id_t update_aig_gate(genome::io_id_t id, uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
+
 		private:
 			/**
 			 * @brief Add AIG mux to genome
@@ -122,25 +141,6 @@ namespace representation {
 			 */
 			genome::io_id_t add_xnor(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
 			
-			/**
-			 * @brief Add AIG gate to chromosome
-			 * @param type type of gate
-			 * @param I1 input 1 of gate 0b00A
-			 * @param I2 input 2 of gate 0b0A0
-			 * @return output id of gate 0bA00
-			 */
-			genome::io_id_t add_aig_gate(uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
-			
-			/**
-			 * @brief Update AIG gate in chromosome
-			 * @param id of gate (output id) 0bA00
-			 * @param type type of gate
-			 * @param I1 input 1 of gate 0b00A
-			 * @param I2 input 2 of gate 0b0A0
-			 * @return output id of gate 0bA00
-			 */
-			genome::io_id_t update_aig_gate(genome::io_id_t id, uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
-
 			/**
 			 * @brief Add and gate from chromosome to module
 			 * @param id of gate in chromosome (gene)

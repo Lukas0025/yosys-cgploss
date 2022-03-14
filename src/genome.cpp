@@ -93,14 +93,14 @@ namespace genome {
 		return this->size() - 1;
 	}
 
-	void genome::add_dummy_gene() {
+	io_id_t genome::add_dummy_gene() {
 		gene_t dummy_gene;
 
 		dummy_gene.type = DUMMY_GENE_TYPE;
 		dummy_gene.I1   = 999999999;
 		dummy_gene.I2   = 999999999;
 
-		this->add_gene(dummy_gene);
+		return this->add_gene(dummy_gene);
 	}
 
 	unsigned genome::size() {

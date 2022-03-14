@@ -50,7 +50,7 @@ namespace genome {
 			 * Add dummy cell to chromosome (On top)
 			 * special type what do nothing
 			 */
-			void add_dummy_gene();
+			io_id_t add_dummy_gene();
 
 			/**
 			 * Get size of chromosome (Number of genes)

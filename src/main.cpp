@@ -41,10 +41,15 @@ struct cgploss : public Pass {
 
 		/* Params parsing */
 		bool wire_test = false;
+		bool debug_indiv = false;
 		for (auto param : params) {
 			
 			if (param == "-wire-test") {
 				wire_test = true;
+			}
+
+			if (param == "-save-individuals") {
+				debug_indiv = true;
 			}
 
 		}
@@ -58,13 +63,21 @@ struct cgploss : public Pass {
 
 			if (!wire_test) {
 
-				log("%d mutations", repres->mutate(10, 5));
+				/*auto generation = new evolution::generation(repres, generation_size);
+				generation->selection(repres);
+
+
+				if (debug_indiv) {
+					std::ofstream reffile;
+					reffile.open ("reference_generation0_individual0.cgp");
+					repres->save(reffile);
+					reffile.close();
+				}
+
+				//log("%d mutations", repres->mutate(10, 5));
 
 				//CGP CODE
-				std::ofstream myfile;
-				myfile.open ("example.txt");
-				repres->save(myfile);
-				myfile.close();
+
 
 				std::vector<simulation::io_t> gates_out(repres->chromosome->size());
 
@@ -74,7 +87,7 @@ struct cgploss : public Pass {
 				//simulation test
 				repres->simulate(gates_out);
 
-				log("%x\n", gates_out[4].byte[0]);
+				//log("%x\n", gates_out[4].byte[0]);*/
 			}
 			
 			genome2design(repres, design);
