@@ -17,6 +17,8 @@
 #include "kernel/sigtools.h"
 
 #define DUMMY_GENE_TYPE 0
+#define MAX_INPUTS 3
+#define IO_ID_T_UNUSED 0xFFFFFFFF 
 
 namespace genome {
 	typedef uint32_t io_id_t;
@@ -24,8 +26,7 @@ namespace genome {
 
 	typedef struct gene {
 		type_t  type;
-		io_id_t I1;
-		io_id_t I2;
+		io_id_t Inputs[MAX_INPUTS];
 	} gene_t;
 
 	class genome {
@@ -77,6 +78,11 @@ namespace genome {
 			 */
 			unsigned mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max);
 
+			bool valid();
+
+			bool is_gene_ins_eqbelow(io_id_t pos, io_id_t threshold);
+			bool sort_asc_by_ins();
+
 			/**
 			 * Order genes in chromosome for CGP
 			 * gene can have inputs only under self
@@ -91,6 +97,8 @@ namespace genome {
 			std::string  to_string();
 
 			std::string raw_string();
+
+			std::string gene_str(gene_t gene);
 			
 			/**
 			 * Get gene on position
@@ -115,5 +123,7 @@ namespace genome {
 			 * last gate in chromosome of type input
 			 */
 			io_id_t last_input;
+
+			unsigned gene_inputs_count = MAX_INPUTS;
 	};
 }

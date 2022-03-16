@@ -30,12 +30,12 @@ namespace representation {
 		auto not_wire = mod->addWire(wire_namespace + "not");
 		
 		gate_cell = mod->addCell(NEW_ID, "$_NOT_");
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
 		gate_cell->setPort(Yosys::ID::Y, not_wire);
 		
 		gate_cell = mod->addCell(NEW_ID, "$_AND_");
 		gate_cell->setPort(Yosys::ID::A, not_wire);
-		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;
@@ -48,12 +48,12 @@ namespace representation {
 		auto not_wire = mod->addWire(wire_namespace + "not");
 		
 		gate_cell = mod->addCell(NEW_ID, "$_NOT_");
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
 		gate_cell->setPort(Yosys::ID::Y, not_wire);
 		
 		gate_cell = mod->addCell(NEW_ID, "$_OR_");
 		gate_cell->setPort(Yosys::ID::A, not_wire);
-		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;
@@ -64,8 +64,8 @@ namespace representation {
 		Yosys::RTLIL::Cell* gate_cell;
 		
 		gate_cell = mod->addCell(NEW_ID, "$_ANDNOT_");
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
-		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;
@@ -76,8 +76,8 @@ namespace representation {
 		Yosys::RTLIL::Cell* gate_cell;
 		
 		gate_cell = mod->addCell(NEW_ID, "$_ORNOT_");
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
-		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;
@@ -87,14 +87,14 @@ namespace representation {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 
-		if (gene.I1 == gene.I2) {
+		if (gene.Inputs[0] == gene.Inputs[1]) {
 			gate_cell = mod->addCell(NEW_ID, "$_BUF_");
 		} else {
 			gate_cell = mod->addCell(NEW_ID, "$_AND_");
-			this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+			this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		}
 		
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;
@@ -104,14 +104,14 @@ namespace representation {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell;
 
-		if (gene.I1 == gene.I2) {
+		if (gene.Inputs[0] == gene.Inputs[1]) {
 			gate_cell = mod->addCell(NEW_ID, "$_NOT_");
 		} else {
 			gate_cell = mod->addCell(NEW_ID, "$_NAND_");
-			this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+			this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		}
 		
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;
@@ -121,8 +121,8 @@ namespace representation {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell = mod->addCell(NEW_ID, "$_OR_");
 
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
-		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;
@@ -132,8 +132,8 @@ namespace representation {
 		auto gene = this->chromosome->get_gene(id);
 		Yosys::RTLIL::Cell* gate_cell = mod->addCell(NEW_ID, "$_NOR_");
 
-		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.I1, assign_map);
-		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.I2, assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
+		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 
 		return gate_cell;

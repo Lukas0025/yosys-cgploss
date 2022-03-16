@@ -39,8 +39,8 @@ namespace representation {
 		genome::gene gene;
 
 		gene.type = SAFE_TYPE_ID(type);
-		gene.I1   = I1;
-		gene.I2   = I2;
+		gene.Inputs[0]   = I1;
+		gene.Inputs[1]   = I2;
 
 		return this->chromosome->add_gene(gene);
 	}
@@ -49,8 +49,8 @@ namespace representation {
 		genome::gene gene;
 
 		gene.type = SAFE_TYPE_ID(type);
-		gene.I1   = I1;
-		gene.I2   = I2;
+		gene.Inputs[0]   = I1;
+		gene.Inputs[1]   = I2;
 
 		this->chromosome->update_gene(id, gene);
 

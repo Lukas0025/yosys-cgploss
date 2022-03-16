@@ -30,15 +30,15 @@ USING_YOSYS_NAMESPACE
 PRIVATE_NAMESPACE_BEGIN
 
 void assert_gene(std::string name, genome::gene_t output, genome::gene_t expected) {
-    if (output.type != expected.type || output.I1 != expected.I1 || output.I2 != expected.I2) {
-        log("Error for %s expected %d, %d, %d returned %d, %d, %d\n", name.c_str(), expected.type, expected.I1, expected.I2, output.type, output.I1, output.I2);
+    if (output.type != expected.type || output.Inputs[0] != expected.Inputs[0] || output.Inputs[2] != expected.Inputs[2]) {
+        log("Error for %s expected %d, %d, %d returned %d, %d, %d\n", name.c_str(), expected.type, expected.Inputs[0], expected.Inputs[1], output.type, output.Inputs[0], output.Inputs[1]);
         exit(1);
     }
 }
 
 void nassert_gene(std::string name, genome::gene_t output, genome::gene_t expected) {
-    if (output.type == expected.type && output.I1 == expected.I1 && output.I2 == expected.I2) {
-        log("Error for %s not expected %d, %d, %d returned %d, %d, %d\n", name.c_str(), expected.type, expected.I1, expected.I2, output.type, output.I1, output.I2);
+    if (output.type == expected.type && output.Inputs[0] == expected.Inputs[0] && output.Inputs[1] == expected.Inputs[1]) {
+        log("Error for %s not expected %d, %d, %d returned %d, %d, %d\n", name.c_str(), expected.type, expected.Inputs[0], expected.Inputs[1], output.type, output.Inputs[0], output.Inputs[1]);
         exit(1);
     }
 }

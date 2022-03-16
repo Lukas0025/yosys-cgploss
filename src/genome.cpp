@@ -29,20 +29,28 @@ namespace genome {
 	void genome::swap_genes(io_id_t id_a, io_id_t id_b) {
 
 		for(auto gene = this->chromosome.begin(); gene < this->chromosome.end(); gene++) {
-			if (gene->I1 == id_a) {
-				gene->I1 = id_b;
-			} else if (gene->I1 == id_b) {
-				gene->I1 = id_a;
+
+			for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+				if (gene->Inputs[i] == id_a) {
+					gene->Inputs[i] = id_b;
+				} else if (gene->Inputs[i] == id_b) {
+					gene->Inputs[i] = id_a;
+				}
 			}
 
-			if (gene->I2 == id_a) {
-				gene->I2 = id_b;
-			} else if (gene->I2 == id_b) {
-				gene->I2 = id_a;
-			}
 		}
 
 		std::swap(this->chromosome[id_a], this->chromosome[id_b]);
+	}
+
+	bool genome::valid() {
+
+		io_id_t id = this->last_input + 1;
+		while (id < this->size()) {
+			id++;
+		}
+
+		return true;
 	}
 
 	unsigned genome::mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max) {
@@ -86,9 +94,10 @@ namespace genome {
 				
 				//generate random for gene inputs
 				std::uniform_int_distribution<io_id_t> rand_mut_inputs(0, rand_pos - 1);
-				
-				mut_gene->I1 = rand_mut_inputs(rand_gen);
-				mut_gene->I2 = rand_mut_inputs(rand_gen);
+
+				for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+					mut_gene->Inputs[i] = rand_mut_inputs(rand_gen);
+				}
 
 				//type mutation
 				mut_gene->type = rand_type(rand_gen);
@@ -108,8 +117,10 @@ namespace genome {
 		gene_t dummy_gene;
 
 		dummy_gene.type = DUMMY_GENE_TYPE;
-		dummy_gene.I1   = 999999999;
-		dummy_gene.I2   = 999999999;
+
+		for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+			dummy_gene.Inputs[i] = IO_ID_T_UNUSED;
+		}
 
 		return this->add_gene(dummy_gene);
 	}
@@ -122,10 +133,70 @@ namespace genome {
 		this->chromosome[pos] = gene;
 	}
 
+	bool genome::is_gene_ins_eqbelow(io_id_t pos, io_id_t threshold) {
+
+		for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+			if (this->chromosome[pos].Inputs[i] > threshold) return false;
+		}
+
+		return true;
+	}
+
+	bool genome::sort_asc_by_ins() {
+		io_id_t id             = this->last_input + 1;
+		io_id_t only_inputs_to = this->last_input;
+
+		while (id < this->size()) {
+			io_id_t to_swap;
+			bool    do_swap = false;
+
+			for (auto i = id; i < this->size(); i++) {
+				if (this->is_gene_ins_eqbelow(i, only_inputs_to)) {
+					to_swap = i;
+					do_swap = true;
+					break;
+				}
+			}
+
+			if (!do_swap) {
+				if (id > (only_inputs_to + 1)) {
+					only_inputs_to++;
+					continue;
+				}
+
+				//same cell have as input own output or input is from gate after this gate (cycle)
+				return false;
+			}
+
+			this->swap_genes(id, to_swap);
+
+			//outputs mapping fix
+			if (this->wire_out.count(id) && this->wire_out.count(to_swap)) {
+
+				std::swap(this->wire_out.at(id), this->wire_out.at(to_swap));
+
+			} else if (this->wire_out.count(id)) {
+
+				this->wire_out[to_swap] = this->wire_out[id];
+				this->wire_out.erase(id);
+
+			} else if (this->wire_out.count(to_swap)) {
+
+				this->wire_out[id] = this->wire_out[to_swap];
+				this->wire_out.erase(to_swap);
+
+			}
+			
+			id++;
+		}
+
+		return true;
+	}
+
 	bool genome::order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs) {
-		//clear input/output maps
+		//set I/Os
 		this->wire_in.clear();
-		this->wire_out.clear();
+		this->wire_out = outputs;
 
 		//fisrt inputs on top
 		io_id_t id = 2; // for const inputs
@@ -144,19 +215,19 @@ namespace genome {
 			}
 
 			//swap in outputs
-			if (outputs.count(id) && outputs.count(input->first)) {
+			if (this->wire_out.count(id) && this->wire_out.count(input->first)) {
 
-				std::swap(outputs.at(id), outputs.at(input->first));
+				std::swap(this->wire_out.at(id), this->wire_out.at(input->first));
 
-			} else if (outputs.count(id)) {
+			} else if (this->wire_out.count(id)) {
 
-				outputs[input->first] = outputs[id];
-				outputs.erase(id);
+				this->wire_out[input->first] = this->wire_out[id];
+				this->wire_out.erase(id);
 
-			} else if (outputs.count(input->first)) {
+			} else if (this->wire_out.count(input->first)) {
 
-				outputs[id] = outputs[input->first];
-				outputs.erase(input->first);
+				this->wire_out[id] = this->wire_out[input->first];
+				this->wire_out.erase(input->first);
 
 			}
 
@@ -165,59 +236,19 @@ namespace genome {
 
 		this->last_input = id - 1;
 
-		//now sort others gates
-		io_id_t only_inputs_to = this->last_input;
-		while (id < this->size()) {
+		return this->sort_asc_by_ins();
+	}
 
-			io_id_t to_swap;
-			bool    do_swap = false;
-			for (auto i = id; i < this->size(); i++) {
-				if (this->chromosome[i].I1 <= only_inputs_to && 
-				    this->chromosome[i].I2 <= only_inputs_to) {
-						to_swap = i;
-						do_swap = true;
-						break;
-					}
-			}
-
-			if (!do_swap) {
-				if (id > (only_inputs_to + 1)) {
-					only_inputs_to++;
-					continue;
-				}
-
-				//same cell have as input own output
-				return false;
-			}
-
-			this->swap_genes(id, to_swap);
-
-			//outputs mapping fix
-			if (outputs.count(id) && outputs.count(to_swap)) {
-
-				std::swap(outputs.at(id), outputs.at(to_swap));
-
-			} else if (outputs.count(id)) {
-
-				outputs[to_swap] = outputs[id];
-				outputs.erase(id);
-
-			} else if (outputs.count(to_swap)) {
-
-				outputs[id] = outputs[to_swap];
-				outputs.erase(to_swap);
-
-			}
-			
-			id++;
+	std::string genome::gene_str(gene_t gene) {
+		std::string res = " ";
+		
+		for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+			res += std::to_string(gene.Inputs[i]) + ",";
 		}
 
-		//set outputs wires
-		for (auto output = outputs.begin(); output != outputs.end(); output++) {
-			this->wire_out[output->first] = output->second;
-		}
+		res.pop_back();
 
-		return true;
+		return res;
 	}
 
 	std::string genome::to_string() {
@@ -225,7 +256,7 @@ namespace genome {
 
 		for (unsigned i = this->last_input + 1; i < this->size(); i++) {
 			auto gene = this->chromosome[i];
-			output += "\n\t\t[" + std::to_string(gene.type) + "," + std::to_string(gene.I1) + "," + std::to_string(gene.I2) + "],";
+			output += "\n\t\t[" + std::to_string(gene.type) + "," + this->gene_str(gene) + "],";
 		}
 
 		if (this->last_input + 1 < this->size()) { //for 0 gates
@@ -241,7 +272,7 @@ namespace genome {
 
 		for (unsigned i = 0; i < this->size(); i++) {
 			auto gene = this->chromosome[i];
-			output += "[" + std::to_string(gene.type) + "," + std::to_string(gene.I1) + "," + std::to_string(gene.I2) + "],";
+			output += "[" + std::to_string(gene.type) + "," + this->gene_str(gene) + "],";
 		}
 
 		if (this->last_input + 1 < this->size()) { //for 0 gates

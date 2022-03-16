@@ -25,7 +25,9 @@ namespace representation {
 	  */
 	class aig : public representation {
 		public:
-			aig(genome::genome* chromosome) : representation(chromosome) {};
+			aig(genome::genome* chromosome) : representation(chromosome) {
+				chromosome->gene_inputs_count = 2;
+			};
 			
 			/**
 			 * @brief Add Yosys::RTLIL cell as AIG to chromosome

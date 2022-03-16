@@ -68,3 +68,5 @@ clean:
 	rm -f test_design
 	rm -f test_run.txt
 	rm -f test_out.v
+	rm -f cgplossUnit.d
+	rm -f cgplossUnit.so
