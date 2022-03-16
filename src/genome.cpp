@@ -15,11 +15,15 @@ namespace genome {
 		this->add_dummy_gene(); //log 1
 	}
 
-	genome::genome(genome *chromosome) {
-		this->chromosome = chromosome->chromosome;
-		this->wire_out   = chromosome->wire_out;
-		this->wire_in    = chromosome->wire_in;
-		this->last_input = chromosome->last_input;
+	genome* genome::clone() {
+		auto chromosome = new genome();
+
+		chromosome->chromosome = this->chromosome;
+		chromosome->wire_out   = this->wire_out;
+		chromosome->wire_in    = this->wire_in;
+		chromosome->last_input = this->last_input;
+
+		return chromosome;
 	}
 
 	void genome::swap_genes(io_id_t id_a, io_id_t id_b) {

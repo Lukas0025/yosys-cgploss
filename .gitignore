@@ -6,3 +6,5 @@ cgploss.d
 test_design
 test_run.txt
 test_out.v
+cgplossUnit.so
+cgplossUnit.d

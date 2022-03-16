@@ -32,7 +32,7 @@ namespace genome {
 		public:
 			genome();
 
-			genome(genome *chromosome);
+			genome *clone();
 
 			/**
 			 * Add gene to chromosome (On top)

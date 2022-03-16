@@ -57,6 +57,12 @@ namespace representation {
 				return "\"gate\": [\"none\", \"A && B\", \"!A && B\", \"A && !B\", \"!A && !B\", \"!(A && B)\", \"!(!A && B)\", \"!(A && !B)\", \"!(!A && !B)\"]";
 			}
 
+			aig* clone() {
+				auto repres = new aig(this->chromosome->clone());
+
+				return repres;
+			}
+
 			/**
 			 * @brief Add AIG gate to chromosome
 			 * @param type type of gate

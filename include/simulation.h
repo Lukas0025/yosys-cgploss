@@ -1,6 +1,7 @@
 //https://codeforces.com/blog/entry/96344
 //https://codeforces.com/blog/entry/66279
 //https://faculty.cc.gatech.edu/~echow/ipcc/hpc-course/08_simd.pdf
+#pragma once
 #include <inttypes.h>
 
 namespace simulation {

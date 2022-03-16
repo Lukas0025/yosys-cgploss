@@ -1,52 +1,66 @@
 #include "generation.h"
-
-#define parrent_by_num(id, parrentA, parrentB) (id == 0 ? parrentA : parrentB)
+#include <random>
 
 namespace evolution {
 
-	void generation::create_kid(unsigned parrentA, unsigned parrentB, std::vector<genome::io_id_t> &parts_index, unsigned part_spec) {
-		auto kid = new representation::representation(this.individuals[parrentA]);
+	unsigned generation::create_kid(unsigned parrentA, unsigned parrentB, std::vector<genome::io_id_t> &crossovers, unsigned part_spec) {
+		auto kid = this->individuals[parrentA]->clone();
 
 		genome::io_id_t last_part = 0;
-		unsigned part_mask = 1;
-		for (auto &part : parts_index) {
-			for (genome::io_id_t i = last_part; i <= part; i++) {
-				kid.chromosome.update_gene(i, this.individuals[parrent_by_num(part_spec & part_mask, parrentA, parrentB)].chromosome.get_gene())
+		unsigned part_mask        = 1;
+		for (auto &crossover : crossovers) {
+			if (part_spec & part_mask) { //genome from parrent B
+				for (genome::io_id_t i = last_part; i <= crossover; i++) {
+					kid->chromosome->update_gene(i, this->individuals[parrentB]->chromosome->get_gene(i));
+				}
 			}
 
-			last_part = part + 1;
+			last_part = crossover + 1;
 			part_mask = part_mask << 1;
 		}
 
-		this.individuals.push_back(kid);
+		if (part_spec & part_mask) { //part of chromosome ofter cross overs
+			for (genome::io_id_t i = last_part; i < kid->chromosome->size(); i++) {
+				kid->chromosome->update_gene(i, this->individuals[parrentB]->chromosome->get_gene(i));
+			}
+		}
+
+		//copy outputs
+		if (part_spec & part_mask) { //parrent B
+			kid->chromosome->wire_out = this->individuals[parrentB]->chromosome->wire_out;
+		}
+
+		this->individuals.push_back(kid);
+		
+		return this->individuals.size() - 1;
 	}
 
-	void generation::cross(unsigned parrentA, unsigned parrentB, unsigned parts = 2) {
+	void generation::cross(unsigned parrentA, unsigned parrentB, unsigned parts) {
 		std::random_device   rd{};
 		std::mt19937         rand_gen{rd()};
-		std::uniform_int_distribution<genome::io_id_t> rand_pos(0, this.individuals[parrentA].size());
+		std::uniform_int_distribution<genome::io_id_t> rand_pos(this->individuals[parrentA]->chromosome->last_input + 1, this->individuals[parrentA]->chromosome->size());
 
 		//parts random selection
-		std::vector<genome::io_id_t> parts_index;
-		for (unsigned part = 1; part < parts; i++) {
-			parts_index.push_back(rand_pos(rand_gen));
+		std::vector<genome::io_id_t> crossovers;
+		for (unsigned part = 1; part < parts; part++) {
+			crossovers.push_back(rand_pos(rand_gen));
 		}
 
 		//order parts by position
-		std::sort(parts_index.begin(), parts_index.end());
+		std::sort(crossovers.begin(), crossovers.end());
 
 		//remove duplicate
-		parts_index.erase(std::unique(parts_index.begin(), parts_index.end()), parts_index.end());
+		crossovers.erase(std::unique(crossovers.begin(), crossovers.end()), crossovers.end());
 
 		//generate kids
-		unsigned kids_count = 1 << parts // 2 ** parts
+		unsigned kids_count = 1 << parts; // 2 ** parts
 
-		for (unsigned kid = 1; kid < kids_count - 1; kid++) {
-			this.create_kid(parrentA, parrentB, parts_index, kid);
+		for (unsigned kid = 0; kid < kids_count; kid++) {
+			this->create_kid(parrentA, parrentB, crossovers, kid);
 		}
 	}
 
-	generation generation::selection(representation::representation *reference, unsigned count) {
+	/*generation generation::selection(representation::representation *reference, unsigned count) {
 		auto new_generation = new generation();
 
 		//todo: add loss function here
@@ -56,9 +70,18 @@ namespace evolution {
 		}
 
 		return new_generation;
-	}
+	}*/
 
 	unsigned generation::add_individual(representation::representation *individual) {
 		this->individuals.push_back(individual);
+
+		return this->individuals.size() - 1;
 	}
+
+	void generation::mutate(unsigned from, unsigned to, unsigned center, unsigned sigma) {
+		for (unsigned i = from; i <= to; i++) {
+			this->individuals[i]->mutate(center, sigma);
+		}
+	}
+
 }
