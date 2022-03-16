@@ -78,6 +78,10 @@ namespace evolution {
 		return this->individuals.size() - 1;
 	}
 
+	unsigned generation::size() {
+		return this->individuals.size();
+	}
+
 	void generation::mutate(unsigned from, unsigned to, unsigned center, unsigned sigma) {
 		for (unsigned i = from; i <= to; i++) {
 			this->individuals[i]->mutate(center, sigma);
