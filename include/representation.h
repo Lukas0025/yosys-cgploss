@@ -31,6 +31,8 @@ namespace representation {
 
 			virtual void simulate(std::vector<simulation::io_t> &gates_o) = 0;
 
+			virtual unsigned power_loss() = 0;
+
 			virtual unsigned mutate(unsigned center, unsigned sigma) = 0;
 
 			virtual representation* clone() = 0;

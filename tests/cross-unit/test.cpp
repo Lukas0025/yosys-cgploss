@@ -86,7 +86,7 @@ struct cgploss : public Pass {
 		chromosomeB->order(in, outB);
 
         //create generation
-		auto generation0 = new evolution::generation();
+		auto generation0 = new evolution::generation(parrentA, 0, 0, 0);
 
 		auto IA = generation0->add_individual(parrentA);
 		auto IB = generation0->add_individual(parrentB);

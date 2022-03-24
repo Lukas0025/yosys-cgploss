@@ -65,6 +65,10 @@ namespace representation {
 				return repres;
 			}
 
+			unsigned power_loss() {
+				return this->chromosome->used_cost();
+			}
+
 			/**
 			 * @brief Add AIG gate to chromosome
 			 * @param type type of gate

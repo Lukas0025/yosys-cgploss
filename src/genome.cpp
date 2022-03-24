@@ -193,6 +193,68 @@ namespace genome {
 		return true;
 	}
 
+	unsigned genome::used_cost() {
+		unsigned cost = 0;
+
+		std::stack<io_id_t> stack;
+		for (auto output: this->wire_out) {
+			stack.push(output.first);
+		}
+
+		while (!stack.empty()) {
+			auto gene_id = stack.top();
+			stack.pop();
+
+			if (gene_id > this->last_input) {
+				auto gene = this->get_gene_ptr(gene_id);
+					
+				for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+					stack.push(gene->Inputs[i]);
+				}
+
+				cost += 1;
+			}
+		}
+
+		return cost;
+	}
+
+	void genome::cut_unused() {
+		std::stack<io_id_t> stack;
+		std::vector<bool>   used(this->chromosome.size());
+		std::fill(used.begin(), used.end(), false);
+
+		for (auto output: this->wire_out) {
+			stack.push(output.first);
+		}
+
+		while (!stack.empty()) {
+			auto gene_id = stack.top();
+			stack.pop();
+
+			if (gene_id > this->last_input) {
+				auto gene = this->get_gene_ptr(gene_id);
+					
+				for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+					stack.push(gene->Inputs[i]);
+				}
+
+				used[gene_id] = true;
+			}
+		}
+
+		for (unsigned i = this->last_input + 1; i < used.size(); i++) {
+			if (!used[i]) {
+				this->swap_genes(i, this->chromosome.size() - 1);
+				this->chromosome.erase(this->chromosome.end() - 1);
+				used.erase(used.begin() + i);
+				i--;
+			}
+		}
+
+
+	}
+
 	bool genome::order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs) {
 		//set I/Os
 		this->wire_in.clear();

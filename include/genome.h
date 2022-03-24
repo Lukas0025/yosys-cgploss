@@ -90,6 +90,10 @@ namespace genome {
 			 */
 			bool order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs);
 
+			unsigned used_cost();
+
+			void cut_unused();                                           
+
 			/**
 			 * Print chromosome on stdout (DEBUG)
 			 * @param printer function with print string to stdout
