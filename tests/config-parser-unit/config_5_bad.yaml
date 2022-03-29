@@ -1,0 +1,6 @@
+# Test desctiption file for CPG
+# This file test bad argument number
+#
+
+# no params
+hello: 

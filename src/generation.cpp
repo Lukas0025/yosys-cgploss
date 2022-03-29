@@ -1,17 +1,18 @@
 #include "generation.h"
 #include <random>
+#include <algorithm>
 
 namespace evolution {
 
 	unsigned generation::create_kid(unsigned parrentA, unsigned parrentB, std::vector<genome::io_id_t> &crossovers, unsigned part_spec) {
-		auto kid = this->individuals[parrentA]->clone();
+		auto kid = this->individuals[parrentA].repres->clone();
 
 		genome::io_id_t last_part = 0;
 		unsigned part_mask        = 1;
 		for (auto &crossover : crossovers) {
 			if (part_spec & part_mask) { //genome from parrent B
 				for (genome::io_id_t i = last_part; i <= crossover; i++) {
-					kid->chromosome->update_gene(i, this->individuals[parrentB]->chromosome->get_gene(i));
+					kid->chromosome->update_gene(i, this->individuals[parrentB].repres->chromosome->get_gene(i));
 				}
 			}
 
@@ -21,29 +22,29 @@ namespace evolution {
 
 		if (part_spec & part_mask) { //part of chromosome ofter cross overs
 			for (genome::io_id_t i = last_part; i < kid->chromosome->size(); i++) {
-				kid->chromosome->update_gene(i, this->individuals[parrentB]->chromosome->get_gene(i));
+				kid->chromosome->update_gene(i, this->individuals[parrentB].repres->chromosome->get_gene(i));
 			}
 		}
 
 		//copy outputs
 		if (part_spec & part_mask) { //parrent B
-			kid->chromosome->wire_out = this->individuals[parrentB]->chromosome->wire_out;
+			kid->chromosome->wire_out = this->individuals[parrentB].repres->chromosome->wire_out;
 		}
 
-		this->individuals.push_back(kid);
+		this->add_individual(kid);
 		
 		return this->individuals.size() - 1;
 	}
 
 	unsigned generation::clone(unsigned parrent) {
-		this->individuals.push_back(this->individuals[parrent]->clone());
+		this->add_individual(this->individuals[parrent].repres->clone());
 		return this->individuals.size() - 1;
 	}
 
 	void generation::cross(unsigned parrentA, unsigned parrentB, unsigned parts) {
 		std::random_device   rd{};
 		std::mt19937         rand_gen{rd()};
-		std::uniform_int_distribution<genome::io_id_t> rand_pos(this->individuals[parrentA]->chromosome->last_input + 1, this->individuals[parrentA]->chromosome->size());
+		std::uniform_int_distribution<genome::io_id_t> rand_pos(this->individuals[parrentA].repres->chromosome->last_input + 1, this->individuals[parrentA].repres->chromosome->size());
 
 		//parts random selection
 		std::vector<genome::io_id_t> crossovers;
@@ -65,13 +66,11 @@ namespace evolution {
 		}
 	}
 
-	bool generation::sort_individual_score_asc(const std::pair<float,void*> &a, const std::pair<float,void*> &b) {
-		return (a.first < b.first);
+	bool generation::sort_individual_score_asc(const individual_t &a, const individual_t &b) {
+		return (a.score < b.score);
 	}
 
 	float generation::score_individual(representation::representation *individual) {
-
-		float loss = 0;
 
 		std::vector<simulation::io_t> xor_outputs(individual->chromosome->wire_out.size());
 		std::vector<simulation::io_t> test_circuic(individual->chromosome->size());
@@ -96,10 +95,7 @@ namespace evolution {
 			}
 
 			if (simulation::one_max_loss(xor_outputs) > this->max_one_loss) {
-				loss = INFINITY;
-				break;
-			} else {
-				loss += (1 - this->power_accuracy_ratio) * total_error + this->power_accuracy_ratio * individual->power_loss();
+				return INFINITY;
 			}
 
 			for (unsigned i = ONE_SIM_VARIANTS; i <= individual->chromosome->last_input; i++) {
@@ -122,30 +118,33 @@ namespace evolution {
 			break;
 		}
 
-		return loss / (1 << (individual->chromosome->last_input + 1));
+		unsigned variants_count = 1 << (individual->chromosome->last_input + 1);
+		float    abs_error      = (float) total_error / variants_count;
+
+		if (abs_error > this->max_abs_loss) {
+			return INFINITY;
+		}
+
+		return (1 - this->power_accuracy_ratio) * abs_error + this->power_accuracy_ratio * individual->power_loss();
 	}
 
-	generation* generation::selection(unsigned count) {
-		auto new_generation = new generation(this->reference, this->generation_size, this->max_one_loss, this->power_accuracy_ratio);
+	void generation::selection(unsigned count) {
 
-		//loss function calculation
-		std::vector<std::pair<float,representation::representation*>> scores;
-
-		for (auto individual : this->individuals) {
-			scores.push_back({this->score_individual(individual), individual});
+		for (unsigned i = 0; i < this->individuals.size(); i++) {
+			this->individuals[i].score = this->score_individual(this->individuals[i].repres);
 		}
 
-		std::sort(scores.begin(), scores.end(), generation::sort_individual_score_asc);
+		std::sort(this->individuals.begin(), this->individuals.end(), generation::sort_individual_score_asc);
 
-		for (unsigned id = 0; id < count; id++) {
-			new_generation->add_individual(scores[id].second);
+		for (unsigned id = count; id < this->individuals.size(); id++) {
+			delete this->individuals[id].repres;
 		}
 
-		return new_generation;
+		this->individuals.erase(this->individuals.begin() + count, this->individuals.end() - 1);
 	}
 
 	unsigned generation::add_individual(representation::representation *individual) {
-		this->individuals.push_back(individual);
+		this->individuals.push_back({individual, 0});
 
 		return this->individuals.size() - 1;
 	}
@@ -156,7 +155,7 @@ namespace evolution {
 
 	void generation::mutate(unsigned from, unsigned to, unsigned center, unsigned sigma) {
 		for (unsigned i = from; i <= to; i++) {
-			this->individuals[i]->mutate(center, sigma);
+			this->individuals[i].repres->mutate(center, sigma);
 		}
 	}
 

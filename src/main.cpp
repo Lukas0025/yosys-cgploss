@@ -24,7 +24,7 @@
 #include "aig.h"
 
 #define debug_indiv_to_file(debug_indiv_file, repres) if (debug_indiv) {repres->save(debug_indiv_file); }
-#define debug_generation_to_file(debug_indiv_file, generation, name) if (debug_indiv) {debug_indiv_file << name; for (unsigned i = 0; i < generation->individuals.size(); i++) { debug_indiv_to_file(debug_indiv_file, generation->individuals[i]) } }
+#define debug_generation_to_file(debug_indiv_file, generation, name) if (debug_indiv) {debug_indiv_file << name; for (unsigned i = 0; i < generation->individuals.size(); i++) { debug_indiv_to_file(debug_indiv_file, generation->individuals[i].repres) } }
 
 
 USING_YOSYS_NAMESPACE
@@ -51,6 +51,7 @@ struct cgploss : public Pass {
 		unsigned param_generation_size      = 500;
 		unsigned param_max_one_loss         = 10;
 		float    param_power_accuracy_ratio = 0.5;
+		float    param_max_abs_loss         = 1;
 		unsigned param_mutate_center        = 2;
 		unsigned param_mutate_sigma         = 2;
 		unsigned param_generations_count    = 100;
@@ -81,7 +82,7 @@ struct cgploss : public Pass {
 
 				debug_indiv_to_file(debug_indiv_file, repres);
 
-				auto generation = new evolution::generation(repres, param_generation_size, param_max_one_loss, param_power_accuracy_ratio);
+				auto generation = new evolution::generation(repres, param_max_one_loss, param_max_abs_loss, param_power_accuracy_ratio);
 				auto parrent0   = generation->add_individual(repres->clone());
 
 				//create generation using clone
@@ -94,10 +95,8 @@ struct cgploss : public Pass {
 				debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION 0\n\n");
 
 				//score
-				auto new_generation = generation->selection(param_selection_count);
-				delete generation;
+				generation->selection(param_selection_count);
 
-				generation = new_generation;
 				for (unsigned i = 1; i < param_generations_count; i++) {
 					if (param_parrents_count == 1) {
 						//clone
@@ -113,18 +112,15 @@ struct cgploss : public Pass {
 					debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION " + std::to_string(i) + "\n\n");
 
 					//score
-					auto new_generation = generation->selection(param_selection_count);
-					delete generation;
-					
-					generation = new_generation;
-					
+					generation->selection(param_selection_count);
 				}
 
 				debug_indiv_file.close();
 
-				auto last_generation = generation->selection(1);
-				repres = last_generation->individuals[0]->clone();
+				repres = generation->individuals[0].repres->clone();
 				repres->chromosome->cut_unused();
+
+				delete generation;
 			}
 			
 			genome2design(repres, design);

@@ -1,7 +1,7 @@
 .ONESHELL:
 .PHONY: clean run tests debugtests
 
-TEST_SRC = src/aig-sim.cpp src/aig-rtlil.cpp src/test.cpp src/genome.cpp src/aig-genome.cpp src/generation.cpp
+TEST_SRC = src/aig-sim.cpp src/aig-rtlil.cpp src/test.cpp src/genome.cpp src/aig-genome.cpp src/generation.cpp src/config-parse.cpp
 
 cgploss.so: yosys/yosys
 	yosys/yosys-config --exec --cxx --cxxflags --ldflags -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs

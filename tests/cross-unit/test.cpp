@@ -23,7 +23,7 @@
 //representations
 #include "aig.h"
 
-#define individual_chromosome(X) generation0->individuals[X]->chromosome
+#define individual_chromosome(X) generation0->individuals[X].repres->chromosome
 #define SIGBIT(id) Yosys::RTLIL::SigBit((RTLIL::State) id)
 
 USING_YOSYS_NAMESPACE

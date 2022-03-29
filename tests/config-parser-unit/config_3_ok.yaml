@@ -1,0 +1,15 @@
+# Test desctiption file for CPG
+# This file test normal working file
+#
+
+# generic argments
+\sum:       msb-first 
+\spi_data:  lsb-first
+\spi2_data: LSB-FIRST
+
+# custom arguments
+\uart_rx: 1024
+
+#  LSB = 0, MSB = 2
+#       LSB MSB
+\uart_tx: 2 4 8 10
