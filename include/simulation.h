@@ -31,6 +31,12 @@
 #include <inttypes.h>
 #include <vector>
 
+#include "kernel/yosys.h"
+#include "kernel/sigtools.h"
+
+#include "genome.h"
+#include "config-parse.h"
+
 namespace simulation {
 	typedef uint8_t io_vector_t __attribute__ ((vector_size(SIM_BYTES_COUNT)));
 
@@ -41,6 +47,6 @@ namespace simulation {
 
 	unsigned bits_count(io_t vec);
 
-	unsigned one_max_loss(std::vector<io_t> xor_outputs);
+	unsigned one_max_loss(std::vector<io_t> xor_outputs, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> rtl_ports, config::parse *config_parse);
 
 }

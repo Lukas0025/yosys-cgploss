@@ -85,15 +85,9 @@ namespace representation {
 
 	Yosys::RTLIL::Cell* aig::rtlil_add_and(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 		auto gene = this->chromosome->get_gene(id);
-		Yosys::RTLIL::Cell* gate_cell;
 
-		if (gene.Inputs[0] == gene.Inputs[1]) {
-			gate_cell = mod->addCell(NEW_ID, "$_BUF_");
-		} else {
-			gate_cell = mod->addCell(NEW_ID, "$_AND_");
-			this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
-		}
-		
+		Yosys::RTLIL::Cell* gate_cell = mod->addCell(NEW_ID, "$_AND_");
+		this->set_rtlil_port(gate_cell, Yosys::ID::B, gene.Inputs[1], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::A, gene.Inputs[0], assign_map);
 		this->set_rtlil_port(gate_cell, Yosys::ID::Y, id, assign_map);
 

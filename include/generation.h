@@ -5,7 +5,9 @@
 #include "kernel/celltypes.h"
 
 #include "genome.h"
+#include "config-parse.h"
 #include "representation.h"
+
 #include <vector>
 #include <algorithm>
 
@@ -23,6 +25,11 @@ namespace evolution {
 				this->reference            = reference;
 				this->max_one_loss         = max_one_loss;
 				this->max_abs_loss         = max_abs_loss;
+
+				for (auto output: reference->chromosome->wire_out) {
+					reference_inverse_wire_out[output.second] = output.first;
+				}
+
 			}
 
 			~generation() {
@@ -37,11 +44,12 @@ namespace evolution {
 			void mutate(unsigned from, unsigned to, unsigned center, unsigned sigma);
 			unsigned size();
 			static bool sort_individual_score_asc(const individual_t &a, const individual_t &b);
-			float score_individual(representation::representation *individual);
+			float score_individual(representation::representation *individual, config::parse *config_parse);
 			unsigned clone(unsigned parrent);
-			void selection(unsigned count);
+			void selection(unsigned count, config::parse *config_parse);
 			
 			std::vector<individual_t> individuals;
+			std::map<Yosys::RTLIL::SigBit, genome::io_id_t> reference_inverse_wire_out;
 			representation::representation *reference;
 			unsigned generation_size;
 			unsigned max_one_loss;

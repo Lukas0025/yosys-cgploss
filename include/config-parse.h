@@ -1,3 +1,5 @@
+#pragma once
+
 #include "kernel/yosys.h"
 #include "kernel/sigtools.h"
 

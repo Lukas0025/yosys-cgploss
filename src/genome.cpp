@@ -41,6 +41,23 @@ namespace genome {
 		}
 
 		std::swap(this->chromosome[id_a], this->chromosome[id_b]);
+
+		//outputs mapping fix
+		if (this->wire_out.count(id_a) && this->wire_out.count(id_b)) {
+
+			std::swap(this->wire_out.at(id_a), this->wire_out.at(id_b));
+
+		} else if (this->wire_out.count(id_a)) {
+
+			this->wire_out[id_b] = this->wire_out[id_a];
+			this->wire_out.erase(id_a);
+
+		} else if (this->wire_out.count(id_b)) {
+
+			this->wire_out[id_a] = this->wire_out[id_b];
+			this->wire_out.erase(id_b);
+
+		}
 	}
 
 	bool genome::valid() {
@@ -169,23 +186,6 @@ namespace genome {
 			}
 
 			this->swap_genes(id, to_swap);
-
-			//outputs mapping fix
-			if (this->wire_out.count(id) && this->wire_out.count(to_swap)) {
-
-				std::swap(this->wire_out.at(id), this->wire_out.at(to_swap));
-
-			} else if (this->wire_out.count(id)) {
-
-				this->wire_out[to_swap] = this->wire_out[id];
-				this->wire_out.erase(id);
-
-			} else if (this->wire_out.count(to_swap)) {
-
-				this->wire_out[id] = this->wire_out[to_swap];
-				this->wire_out.erase(to_swap);
-
-			}
 			
 			id++;
 		}
@@ -245,7 +245,10 @@ namespace genome {
 
 		for (unsigned i = this->last_input + 1; i < used.size(); i++) {
 			if (!used[i]) {
-				this->swap_genes(i, this->chromosome.size() - 1);
+				for (unsigned j = i; j < this->chromosome.size() - 1; j++) {
+					this->swap_genes(j, j + 1);
+				}
+
 				this->chromosome.erase(this->chromosome.end() - 1);
 				used.erase(used.begin() + i);
 				i--;
@@ -274,23 +277,6 @@ namespace genome {
 				inputs.erase(id);
 			} else {
 				inputs.erase(input->first);
-			}
-
-			//swap in outputs
-			if (this->wire_out.count(id) && this->wire_out.count(input->first)) {
-
-				std::swap(this->wire_out.at(id), this->wire_out.at(input->first));
-
-			} else if (this->wire_out.count(id)) {
-
-				this->wire_out[input->first] = this->wire_out[id];
-				this->wire_out.erase(id);
-
-			} else if (this->wire_out.count(input->first)) {
-
-				this->wire_out[id] = this->wire_out[input->first];
-				this->wire_out.erase(input->first);
-
 			}
 
 			id++;

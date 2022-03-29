@@ -12,6 +12,7 @@
 //CGP
 #include "genome.h"
 #include "generation.h"
+#include "config-parse.h"
 
 #include <string>
 #include <map>
@@ -19,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <regex>
 
 //representations
 #include "aig.h"
@@ -49,36 +51,144 @@ struct cgploss : public Pass {
 		bool debug_indiv                    = false;
 		unsigned param_selection_count      = 50;
 		unsigned param_generation_size      = 500;
-		unsigned param_max_one_loss         = 10;
+		unsigned param_max_one_loss         = 0;
 		float    param_power_accuracy_ratio = 0.5;
-		float    param_max_abs_loss         = 1;
+		float    param_max_abs_loss         = 0;
 		unsigned param_mutate_center        = 2;
 		unsigned param_mutate_sigma         = 2;
 		unsigned param_generations_count    = 100;
 		unsigned param_parrents_count       = 1;
+		std::string config_file             = "";
 
 		for (auto param : params) {
 			
 			if (param == "-wire_test") {
 				wire_test = true;
-			}
-
-			if (param == "-save_individuals") {
+			} else if (param == "-save_individuals") {
 				debug_indiv = true;
+			} else if (param.rfind("-ports_weights=", 0) == 0) {
+				config_file = param.substr(std::string("-ports_weights=").length());
+			} else if (param.rfind("-selection_size=", 0) == 0) {
+				auto parsed = param.substr(std::string("-selection_size=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -selection_size using default\n");
+				} else {
+					param_selection_count = stoi(parsed);
+				}
+
+			} else if (param.rfind("-generation_size=", 0) == 0) {
+				auto parsed = param.substr(std::string("-generation_size=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -generation_size using default\n");
+				} else {
+					param_generation_size = stoi(parsed);
+				}
+
+			} else if (param.rfind("-max_one_error=", 0) == 0) {
+				auto parsed = param.substr(std::string("-max_one_error=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -max_one_error using default\n");
+				} else {
+					param_max_one_loss = stoi(parsed);
+				}
+
+			} else if (param.rfind("-generations=", 0) == 0) {
+				auto parsed = param.substr(std::string("-generations=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -generations using default\n");
+				} else {
+					param_generations_count = stoi(parsed);
+				}
+
+			} else if (param.rfind("-mutations_count=", 0) == 0) {
+				auto parsed = param.substr(std::string("-mutations_count=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -mutations_count using default\n");
+				} else {
+					param_mutate_center = stoi(parsed);
+				}
+
+			} else if (param.rfind("-mutations_count_sigma=", 0) == 0) {
+				auto parsed = param.substr(std::string("-mutations_count_sigma=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -mutations_count_sigma using default\n");
+				} else {
+					param_mutate_sigma = stoi(parsed);
+				}
+
+			} else if (param.rfind("-parrents=", 0) == 0) {
+				auto parsed = param.substr(std::string("-parrents=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -parrents using default\n");
+				} else {
+					param_parrents_count = stoi(parsed);
+				}
+
+				if (param_parrents_count > 2) {
+					log("[ERROR] Bad value for -parrents, max value is 2, min value is 1. using 2\n");
+					param_parrents_count = 2;
+				} else if (param_parrents_count < 1) {
+					log("[ERROR] Bad value for -parrents, max value is 2, min value is 1. using 1\n");
+					param_parrents_count = 1;
+				}
+
+			} else if (param.rfind("-power_accuracy_ratio=", 0) == 0) {
+				auto parsed = param.substr(std::string("-power_accuracy_ratio=").length());
+
+				try {
+        			param_power_accuracy_ratio = std::stof(parsed);
+    			} catch (std::invalid_argument const& ex) {
+					log("[ERROR] Bad value for -power_accuracy_ratio using default\n");
+				}
+
+			} else if (param.rfind("-max_abs_error=", 0) == 0) {
+				auto parsed = param.substr(std::string("-max_abs_error=").length());
+
+				try {
+        			param_max_abs_loss = std::stof(parsed);
+    			} catch (std::invalid_argument const& ex) {
+					log("[ERROR] Bad value for -power_accuracy_ratio using default\n");
+				}
+
+			} else {
+				log("[WARNING] ignorig argument %s\n", param.c_str());	
 			}
 
 		}
 
 		/* CGP Code */
 		auto chromosome = new genome::genome();
+		auto config     = new config::parse();
 		representation::representation *repres = new representation::aig(chromosome);
 
 		try {
 			auto map = design2genome(design, repres);
 
+			if (config_file.size() > 0) {
+				std::ifstream config_file_stream;
+				config_file_stream.open(config_file);
+				auto error = config->parse_file(config_file_stream, map.out);
+
+				if (error) {
+					log("[ERROR] config file parse error on line %d - in failsafe mode using default weights\n", error);
+				}
+
+				config_file_stream.close();
+			}
+
 			if (!wire_test) {
 				std::ofstream debug_indiv_file;
-				debug_indiv_file.open("debug.json");
+
+				if (debug_indiv) {
+					debug_indiv_file.open("debug.json");
+				}
 
 				debug_indiv_to_file(debug_indiv_file, repres);
 
@@ -95,7 +205,7 @@ struct cgploss : public Pass {
 				debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION 0\n\n");
 
 				//score
-				generation->selection(param_selection_count);
+				generation->selection(param_selection_count, config);
 
 				for (unsigned i = 1; i < param_generations_count; i++) {
 					if (param_parrents_count == 1) {
@@ -112,13 +222,18 @@ struct cgploss : public Pass {
 					debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION " + std::to_string(i) + "\n\n");
 
 					//score
-					generation->selection(param_selection_count);
+					generation->selection(param_selection_count, config);
 				}
-
-				debug_indiv_file.close();
 
 				repres = generation->individuals[0].repres->clone();
 				repres->chromosome->cut_unused();
+
+				debug_indiv_to_file(debug_indiv_file, repres);
+
+
+				if (debug_indiv) {
+					debug_indiv_file.close();
+				}
 
 				delete generation;
 			}

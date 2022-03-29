@@ -70,7 +70,7 @@ namespace evolution {
 		return (a.score < b.score);
 	}
 
-	float generation::score_individual(representation::representation *individual) {
+	float generation::score_individual(representation::representation *individual, config::parse *config_parse) {
 
 		std::vector<simulation::io_t> xor_outputs(individual->chromosome->wire_out.size());
 		std::vector<simulation::io_t> test_circuic(individual->chromosome->size());
@@ -89,12 +89,12 @@ namespace evolution {
 
 			unsigned i = 0;
 			for (auto output: individual->chromosome->wire_out) {
-				xor_outputs[i].vec = test_circuic[output.first].vec ^ reference_circuic[output.first].vec;
-				total_error += simulation::bits_count(xor_outputs[xor_outputs.size() - 1]);
+				xor_outputs[i].vec = test_circuic[output.first].vec ^ reference_circuic[this->reference_inverse_wire_out[output.second]].vec;
+				total_error += simulation::bits_count(xor_outputs[i]) * config_parse->port_weight(output.second);
 				i++;
 			}
 
-			if (simulation::one_max_loss(xor_outputs) > this->max_one_loss) {
+			if (simulation::one_max_loss(xor_outputs, individual->chromosome->wire_out, config_parse) > this->max_one_loss) {
 				return INFINITY;
 			}
 
@@ -128,10 +128,10 @@ namespace evolution {
 		return (1 - this->power_accuracy_ratio) * abs_error + this->power_accuracy_ratio * individual->power_loss();
 	}
 
-	void generation::selection(unsigned count) {
+	void generation::selection(unsigned count, config::parse *config_parse) {
 
 		for (unsigned i = 0; i < this->individuals.size(); i++) {
-			this->individuals[i].score = this->score_individual(this->individuals[i].repres);
+			this->individuals[i].score = this->score_individual(this->individuals[i].repres, config_parse);
 		}
 
 		std::sort(this->individuals.begin(), this->individuals.end(), generation::sort_individual_score_asc);
@@ -140,7 +140,7 @@ namespace evolution {
 			delete this->individuals[id].repres;
 		}
 
-		this->individuals.erase(this->individuals.begin() + count, this->individuals.end() - 1);
+		this->individuals.erase(this->individuals.begin() + count, this->individuals.end());
 	}
 
 	unsigned generation::add_individual(representation::representation *individual) {
