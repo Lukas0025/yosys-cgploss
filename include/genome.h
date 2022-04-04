@@ -90,7 +90,7 @@ namespace genome {
 			 */
 			bool order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs);
 
-			unsigned used_cost();
+			unsigned used_cost(unsigned (*gate_power)(gene_t));
 
 			void cut_unused();                                           
 

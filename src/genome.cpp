@@ -62,9 +62,10 @@ namespace genome {
 
 	bool genome::valid() {
 
-		io_id_t id = this->last_input + 1;
-		while (id < this->size()) {
-			id++;
+		for (io_id_t i = this->last_input + 1; i < this->size(); i++) {
+			if (!this->is_gene_ins_eqbelow(i, i - 1)) {
+				return false;
+			}
 		}
 
 		return true;
@@ -193,7 +194,7 @@ namespace genome {
 		return true;
 	}
 
-	unsigned genome::used_cost() {
+	unsigned genome::used_cost(unsigned (*gate_power)(gene_t)) {
 		unsigned cost = 0;
 
 		std::stack<io_id_t> stack;
@@ -212,7 +213,7 @@ namespace genome {
 					stack.push(gene->Inputs[i]);
 				}
 
-				cost += 1;
+				cost += gate_power(*gene);
 			}
 		}
 

@@ -52,7 +52,7 @@ namespace representation {
 			 * @return string 
 			 */
 			std::string parts_naming() {
-				return "\"gate\": [\"none\", \"A && B\", \"!A && B\", \"A && !B\", \"!A && !B\", \"!(A && B)\", \"!(!A && B)\", \"!(A && !B)\", \"!(!A && !B)\"]";
+				return "\"gate\": [\"none\", \"A && B\", \"!A\", \"!(A && B)\", \"A && !B\", \"A || B\", \"!(A || B)\", \"A || !B\", \"A ^ B\", \"!(A ^ B)\"]";
 			}
 
 			gates* clone() {
@@ -62,8 +62,23 @@ namespace representation {
 			}
 
 			unsigned power_loss() {
-				return this->chromosome->used_cost();
+				return this->chromosome->used_cost(gates::gate_power);
 			}
+
+            static unsigned gate_power(genome::gene_t gene) {
+				//by ranzistor count in CMOS
+                if (gene.type == SAFE_TYPE_ID(AND_GATE_ID))    return 6;
+				if (gene.type == SAFE_TYPE_ID(NOT_GATE_ID))    return 2;
+				if (gene.type == SAFE_TYPE_ID(NAND_GATE_ID))   return 4;
+				if (gene.type == SAFE_TYPE_ID(ANDNOT_GATE_ID)) return 8;
+				if (gene.type == SAFE_TYPE_ID(OR_GATE_ID))     return 6;
+				if (gene.type == SAFE_TYPE_ID(NOR_GATE_ID))    return 4;
+				if (gene.type == SAFE_TYPE_ID(OR_NOT_GATE_ID)) return 8;
+				if (gene.type == SAFE_TYPE_ID(XOR_GATE_ID))    return 12;
+				if (gene.type == SAFE_TYPE_ID(XNOR_GATE_ID))   return 14;
+
+				return 1;
+            }
 
 			/**
 			 * @brief Add gate to chromosome

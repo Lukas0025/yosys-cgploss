@@ -17,6 +17,7 @@
 #include <fstream>
 
 #define SAFE_TYPE_ID(X) (X + 1)
+#define UNSAFE_TYPE_ID(X) (X - 1)
 
 namespace representation {
 	class representation {
@@ -46,12 +47,16 @@ namespace representation {
 			}
 
 			void set_rtlil_port(Yosys::RTLIL::Cell* gate, Yosys::RTLIL::IdString port, genome::io_id_t genome_port, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
+				gate->setPort(port, this->get_rtlil_port(genome_port,assign_map));
+			}
+
+			Yosys::RTLIL::SigBit get_rtlil_port(genome::io_id_t genome_port, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 				if (genome_port == 0) {
-					gate->setPort(port, Yosys::RTLIL::State::S0);
+					return Yosys::RTLIL::State::S0;
 				} else if (genome_port == 1) {
-					gate->setPort(port, Yosys::RTLIL::State::S1);
+					return Yosys::RTLIL::State::S1;
 				} else {
-					gate->setPort(port, assign_map[genome_port]);
+					return assign_map[genome_port];
 				}
 			}
 

@@ -1,0 +1,4 @@
+read_verilog tests/all-gates-mig-load/code.v
+techmap
+cgploss -wire_test -representation=mig
+write_verilog test_out.v

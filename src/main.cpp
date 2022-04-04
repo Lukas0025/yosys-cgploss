@@ -25,6 +25,7 @@
 //representations
 #include "aig.h"
 #include "gates.h"
+#include "mig.h"
 
 #define debug_indiv_to_file(debug_indiv_file, repres) if (debug_indiv) {repres->save(debug_indiv_file); }
 #define debug_generation_to_file(debug_indiv_file, generation, name) if (debug_indiv) {debug_indiv_file << name; for (unsigned i = 0; i < generation->individuals.size(); i++) { debug_indiv_to_file(debug_indiv_file, generation->individuals[i].repres) } }
@@ -59,6 +60,7 @@ struct cgploss : public Pass {
 		unsigned param_mutate_sigma         = 2;
 		unsigned param_generations_count    = 100;
 		unsigned param_parrents_count       = 1;
+		unsigned param_cross_parts          = 4;
 		std::string config_file             = "";
 		std::string param_repres            = "aig";
 
@@ -168,8 +170,24 @@ struct cgploss : public Pass {
 					log("[ERROR] Bad value for -representation using default\n");
 				}
 
+			} else if (param.rfind("-cross_parts=", 0) == 0) {
+				auto parsed = param.substr(std::string("-cross_parts=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -cross_parts using default\n");
+				} else {
+					param_parrents_count = stoi(parsed);
+				}
+
+				if (param_parrents_count < 2) {
+					log("[ERROR] Bad value for -cross_parts, min value is 2. using 2\n");
+					param_parrents_count = 2;
+				}
+
 			} else {
-				log("[WARNING] ignorig argument %s\n", param.c_str());	
+				if (param != "cgploss") {
+					log("[WARNING] ignorig argument %s\n", param.c_str());
+				}	
 			}
 
 		}
@@ -181,7 +199,7 @@ struct cgploss : public Pass {
 		
 		if      (param_repres == "aig")   repres = new representation::aig(chromosome);
 		else if (param_repres == "gates") repres = new representation::gates(chromosome);
-		else if (param_repres == "mig")   repres = new representation::gates(chromosome);
+		else if (param_repres == "mig")   repres = new representation::mig(chromosome);
 
 		try {
 			auto map = design2genome(design, repres);
@@ -198,6 +216,16 @@ struct cgploss : public Pass {
 				config_file_stream.close();
 			}
 
+			if (param_parrents_count == 2 && param_selection_count < 2) {
+				log("[ERROR] minimal selection_count for two parrents is 2. setting to 2\n");
+				param_selection_count = 2;
+			}
+
+			if (param_generation_size > param_selection_count) {
+				log("[ERROR] generation cant be bigger that selection count. setting to selection count\n");
+				param_generation_size = param_selection_count;
+			}
+
 			log("[INFO] Starting CPG with parameters:\n");
 			log("       wire_test           : %d\n", wire_test);
 			log("       save_individuals    : %d\n", debug_indiv);
@@ -209,6 +237,7 @@ struct cgploss : public Pass {
 			log("       mutations_count     : %d\n", param_mutate_center);
 			log("       mutations_sigma     : %d\n", param_mutate_sigma);
 			log("       parrents            : %d\n", param_parrents_count);
+			log("       cross_parts         : %d\n", param_cross_parts);
 			log("       power_accuracy_ratio: %f\n", param_power_accuracy_ratio);
 			log("       representation      : %s\n\n", param_repres.c_str());
 
@@ -244,6 +273,14 @@ struct cgploss : public Pass {
 						}
 					} else {
 						//cross
+						unsigned parrentA = 0;
+						unsigned parrentB = 1;
+						while(generation->size() < param_generation_size) {
+							generation->cross(parrentA, parrentB, param_cross_parts);
+
+							parrentA = (parrentA + 3) % param_selection_count;
+							parrentB = (parrentB + 1) % param_selection_count;
+						}
 					}
 
 					generation->mutate(param_selection_count, generation->size() - 1, param_mutate_center, param_mutate_sigma);

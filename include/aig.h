@@ -66,8 +66,23 @@ namespace representation {
 			}
 
 			unsigned power_loss() {
-				return this->chromosome->used_cost();
+				return this->chromosome->used_cost(aig::gate_power);
 			}
+
+            static unsigned gate_power(genome::gene_t gene) {
+				if (gene.type == SAFE_TYPE_ID(0b000) && gene.Inputs[0] == gene.Inputs[1]) return 2; //buffer
+				if (gene.type == SAFE_TYPE_ID(0b000)) return 6; //AND
+				if (gene.type == SAFE_TYPE_ID(0b001)) return 9; //AND NOT A
+				if (gene.type == SAFE_TYPE_ID(0b010)) return 8; //AND NOT
+				if (gene.type == SAFE_TYPE_ID(0b011)) return 4; //NOR
+				if (gene.type == SAFE_TYPE_ID(0b100) && gene.Inputs[0] == gene.Inputs[1]) return 2; //not
+				if (gene.type == SAFE_TYPE_ID(0b100)) return 4; //NAND
+				if (gene.type == SAFE_TYPE_ID(0b101)) return 8; //OR NOT
+				if (gene.type == SAFE_TYPE_ID(0b110)) return 9; //OR NOT A
+				if (gene.type == SAFE_TYPE_ID(0b111)) return 6; //OR
+
+				return 1;
+            }
 
 			/**
 			 * @brief Add AIG gate to chromosome
