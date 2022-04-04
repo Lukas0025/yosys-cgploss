@@ -221,7 +221,7 @@ struct cgploss : public Pass {
 				param_selection_count = 2;
 			}
 
-			if (param_generation_size > param_selection_count) {
+			if (param_selection_count > param_generation_size) {
 				log("[ERROR] generation cant be bigger that selection count. setting to selection count\n");
 				param_generation_size = param_selection_count;
 			}
