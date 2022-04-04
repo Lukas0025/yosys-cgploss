@@ -24,6 +24,7 @@
 
 //representations
 #include "aig.h"
+#include "gates.h"
 
 #define debug_indiv_to_file(debug_indiv_file, repres) if (debug_indiv) {repres->save(debug_indiv_file); }
 #define debug_generation_to_file(debug_indiv_file, generation, name) if (debug_indiv) {debug_indiv_file << name; for (unsigned i = 0; i < generation->individuals.size(); i++) { debug_indiv_to_file(debug_indiv_file, generation->individuals[i].repres) } }
@@ -59,6 +60,7 @@ struct cgploss : public Pass {
 		unsigned param_generations_count    = 100;
 		unsigned param_parrents_count       = 1;
 		std::string config_file             = "";
+		std::string param_repres            = "aig";
 
 		for (auto param : params) {
 			
@@ -154,7 +156,16 @@ struct cgploss : public Pass {
 				try {
         			param_max_abs_loss = std::stof(parsed);
     			} catch (std::invalid_argument const& ex) {
-					log("[ERROR] Bad value for -power_accuracy_ratio using default\n");
+					log("[ERROR] Bad value for -max_abs_error using default\n");
+				}
+
+			} else if (param.rfind("-representation=", 0) == 0) {
+				auto parsed = param.substr(std::string("-representation=").length());
+
+				if (parsed == "gates" || parsed == "mig" || parsed == "aig") {
+					param_repres = parsed;
+				} else {
+					log("[ERROR] Bad value for -representation using default\n");
 				}
 
 			} else {
@@ -166,7 +177,11 @@ struct cgploss : public Pass {
 		/* CGP Code */
 		auto chromosome = new genome::genome();
 		auto config     = new config::parse();
-		representation::representation *repres = new representation::aig(chromosome);
+		representation::representation *repres = NULL;
+		
+		if      (param_repres == "aig")   repres = new representation::aig(chromosome);
+		else if (param_repres == "gates") repres = new representation::gates(chromosome);
+		else if (param_repres == "mig")   repres = new representation::gates(chromosome);
 
 		try {
 			auto map = design2genome(design, repres);
@@ -182,6 +197,20 @@ struct cgploss : public Pass {
 
 				config_file_stream.close();
 			}
+
+			log("[INFO] Starting CPG with parameters:\n");
+			log("       wire_test           : %d\n", wire_test);
+			log("       save_individuals    : %d\n", debug_indiv);
+			log("       ports_weights       : %s\n", config_file.c_str());
+			log("       selection_size      : %d\n", param_selection_count);
+			log("       generation_size     : %d\n", param_generation_size);
+			log("       max_one_error       : %d\n", param_max_one_loss);
+			log("       generations         : %d\n", param_generations_count);
+			log("       mutations_count     : %d\n", param_mutate_center);
+			log("       mutations_sigma     : %d\n", param_mutate_sigma);
+			log("       parrents            : %d\n", param_parrents_count);
+			log("       power_accuracy_ratio: %f\n", param_power_accuracy_ratio);
+			log("       representation      : %s\n\n", param_repres.c_str());
 
 			if (!wire_test) {
 				std::ofstream debug_indiv_file;
@@ -207,7 +236,7 @@ struct cgploss : public Pass {
 				//score
 				generation->selection(param_selection_count, config);
 
-				for (unsigned i = 1; i < param_generations_count; i++) {
+				for (unsigned generation_id = 1; generation_id < param_generations_count; generation_id++) {
 					if (param_parrents_count == 1) {
 						//clone
 						for (unsigned i = param_selection_count; i < param_generation_size; i++) {
@@ -219,10 +248,12 @@ struct cgploss : public Pass {
 
 					generation->mutate(param_selection_count, generation->size() - 1, param_mutate_center, param_mutate_sigma);
 
-					debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION " + std::to_string(i) + "\n\n");
+					debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION " + std::to_string(generation_id) + "\n\n");
 
 					//score
 					generation->selection(param_selection_count, config);
+
+					log("[INFO] generation %i best individual score %f\n",  generation_id, generation->individuals[0].score);
 				}
 
 				repres = generation->individuals[0].repres->clone();

@@ -130,6 +130,7 @@ namespace evolution {
 
 	void generation::selection(unsigned count, config::parse *config_parse) {
 
+		#pragma omp parallel for
 		for (unsigned i = 0; i < this->individuals.size(); i++) {
 			this->individuals[i].score = this->score_individual(this->individuals[i].repres, config_parse);
 		}
