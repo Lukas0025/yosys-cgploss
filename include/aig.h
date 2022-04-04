@@ -25,7 +25,9 @@ namespace representation {
 	  */
 	class aig : public representation {
 		public:
-			aig(genome::genome* chromosome) : representation(chromosome) {};
+			aig(genome::genome* chromosome) : representation(chromosome) {
+				chromosome->gene_inputs_count = 2;
+			};
 			
 			/**
 			 * @brief Add Yosys::RTLIL cell as AIG to chromosome
@@ -45,6 +47,10 @@ namespace representation {
 			 */
 			Yosys::RTLIL::Cell *get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
 			
+			void simulate(std::vector<simulation::io_t> &gates_o);
+
+			unsigned mutate(unsigned center, unsigned sigma);
+
 			/**
 			 * @brief Get name of parts in genome
 			 * @return string 
@@ -52,6 +58,50 @@ namespace representation {
 			std::string parts_naming() {
 				return "\"gate\": [\"none\", \"A && B\", \"!A && B\", \"A && !B\", \"!A && !B\", \"!(A && B)\", \"!(!A && B)\", \"!(A && !B)\", \"!(!A && !B)\"]";
 			}
+
+			aig* clone() {
+				auto repres = new aig(this->chromosome->clone());
+
+				return repres;
+			}
+
+			unsigned power_loss() {
+				return this->chromosome->used_cost(aig::gate_power);
+			}
+
+            static unsigned gate_power(genome::gene_t gene) {
+				if (gene.type == SAFE_TYPE_ID(0b000) && gene.Inputs[0] == gene.Inputs[1]) return 2; //buffer
+				if (gene.type == SAFE_TYPE_ID(0b000)) return 6; //AND
+				if (gene.type == SAFE_TYPE_ID(0b001)) return 9; //AND NOT A
+				if (gene.type == SAFE_TYPE_ID(0b010)) return 8; //AND NOT
+				if (gene.type == SAFE_TYPE_ID(0b011)) return 4; //NOR
+				if (gene.type == SAFE_TYPE_ID(0b100) && gene.Inputs[0] == gene.Inputs[1]) return 2; //not
+				if (gene.type == SAFE_TYPE_ID(0b100)) return 4; //NAND
+				if (gene.type == SAFE_TYPE_ID(0b101)) return 8; //OR NOT
+				if (gene.type == SAFE_TYPE_ID(0b110)) return 9; //OR NOT A
+				if (gene.type == SAFE_TYPE_ID(0b111)) return 6; //OR
+
+				return 1;
+            }
+
+			/**
+			 * @brief Add AIG gate to chromosome
+			 * @param type type of gate
+			 * @param I1 input 1 of gate 0b00A
+			 * @param I2 input 2 of gate 0b0A0
+			 * @return output id of gate 0bA00
+			 */
+			genome::io_id_t add_aig_gate(uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
+			
+			/**
+			 * @brief Update AIG gate in chromosome
+			 * @param id of gate (output id) 0bA00
+			 * @param type type of gate
+			 * @param I1 input 1 of gate 0b00A
+			 * @param I2 input 2 of gate 0b0A0
+			 * @return output id of gate 0bA00
+			 */
+			genome::io_id_t update_aig_gate(genome::io_id_t id, uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
 
 		private:
 			/**
@@ -118,25 +168,6 @@ namespace representation {
 			 */
 			genome::io_id_t add_xnor(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
 			
-			/**
-			 * @brief Add AIG gate to chromosome
-			 * @param type type of gate
-			 * @param I1 input 1 of gate 0b00A
-			 * @param I2 input 2 of gate 0b0A0
-			 * @return output id of gate 0bA00
-			 */
-			genome::io_id_t add_aig_gate(uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
-			
-			/**
-			 * @brief Update AIG gate in chromosome
-			 * @param id of gate (output id) 0bA00
-			 * @param type type of gate
-			 * @param I1 input 1 of gate 0b00A
-			 * @param I2 input 2 of gate 0b0A0
-			 * @return output id of gate 0bA00
-			 */
-			genome::io_id_t update_aig_gate(genome::io_id_t id, uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
-
 			/**
 			 * @brief Add and gate from chromosome to module
 			 * @param id of gate in chromosome (gene)

@@ -4,16 +4,20 @@
  * @author Lukas Plevac <xpleva07@vutbr.cz>
  */
 
+#pragma once
+
 #include "kernel/yosys.h"
 #include "kernel/sigtools.h"
 #include "kernel/celltypes.h"
 
 #include "genome.h"
+#include "simulation.h"
 #include <string>
 #include <iostream>
 #include <fstream>
 
 #define SAFE_TYPE_ID(X) (X + 1)
+#define UNSAFE_TYPE_ID(X) (X - 1)
 
 namespace representation {
 	class representation {
@@ -22,21 +26,37 @@ namespace representation {
 				this->chromosome = chromosome;
 			}
 
+			virtual ~representation() {
+				delete this->chromosome;
+			}
+
 			virtual genome::io_id_t add_cell(Yosys::RTLIL::IdString type, std::vector<genome::io_id_t> inputs, genome::io_id_t output) = 0;
 
 			virtual Yosys::RTLIL::Cell* get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace) = 0;
+
+			virtual void simulate(std::vector<simulation::io_t> &gates_o) = 0;
+
+			virtual unsigned power_loss() = 0;
+
+			virtual unsigned mutate(unsigned center, unsigned sigma) = 0;
+
+			virtual representation* clone() = 0;
 			
 			virtual std::string parts_naming() {
 				return "\"gate\": [\"none\"]";
 			}
 
 			void set_rtlil_port(Yosys::RTLIL::Cell* gate, Yosys::RTLIL::IdString port, genome::io_id_t genome_port, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
+				gate->setPort(port, this->get_rtlil_port(genome_port,assign_map));
+			}
+
+			Yosys::RTLIL::SigBit get_rtlil_port(genome::io_id_t genome_port, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map) {
 				if (genome_port == 0) {
-					gate->setPort(port, Yosys::RTLIL::State::S0);
+					return Yosys::RTLIL::State::S0;
 				} else if (genome_port == 1) {
-					gate->setPort(port, Yosys::RTLIL::State::S1);
+					return Yosys::RTLIL::State::S1;
 				} else {
-					gate->setPort(port, assign_map[genome_port]);
+					return assign_map[genome_port];
 				}
 			}
 

@@ -17,6 +17,8 @@
 #include "kernel/sigtools.h"
 
 #define DUMMY_GENE_TYPE 0
+#define MAX_INPUTS 3
+#define IO_ID_T_UNUSED 0xFFFFFFFF 
 
 namespace genome {
 	typedef uint32_t io_id_t;
@@ -24,13 +26,14 @@ namespace genome {
 
 	typedef struct gene {
 		type_t  type;
-		io_id_t I1;
-		io_id_t I2;
+		io_id_t Inputs[MAX_INPUTS];
 	} gene_t;
 
 	class genome {
 		public:
 			genome();
+
+			genome *clone();
 
 			/**
 			 * Add gene to chromosome (On top)
@@ -50,7 +53,7 @@ namespace genome {
 			 * Add dummy cell to chromosome (On top)
 			 * special type what do nothing
 			 */
-			void add_dummy_gene();
+			io_id_t add_dummy_gene();
 
 			/**
 			 * Get size of chromosome (Number of genes)
@@ -65,11 +68,31 @@ namespace genome {
 			void update_gene(io_id_t pos, gene_t gene);
 
 			/**
+			 * Perform mutation on chromosome
+			 * 
+			 * @param center center of normal distribution of number of mutations
+			 * @param sigma sigma of normal distribution of number of mutations
+			 * @param type_min minimum ID of type of gene (for mutation)
+			 * @param type_max maximum ID of tzpe of gene (for mutation)
+			 * @return unsigned number of mutations
+			 */
+			unsigned mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max);
+
+			bool valid();
+
+			bool is_gene_ins_eqbelow(io_id_t pos, io_id_t threshold);
+			bool sort_asc_by_ins();
+
+			/**
 			 * Order genes in chromosome for CGP
 			 * gene can have inputs only under self
 			 * @param inputs inputs map
 			 */
 			bool order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs);
+
+			unsigned used_cost(unsigned (*gate_power)(gene_t));
+
+			void cut_unused();                                           
 
 			/**
 			 * Print chromosome on stdout (DEBUG)
@@ -78,6 +101,8 @@ namespace genome {
 			std::string  to_string();
 
 			std::string raw_string();
+
+			std::string gene_str(gene_t gene);
 			
 			/**
 			 * Get gene on position
@@ -85,6 +110,8 @@ namespace genome {
 			 * @return cell_t
 			 */
 			gene_t get_gene(io_id_t pos);
+
+			gene_t* get_gene_ptr(io_id_t pos);
 			
 			/**
 			 * Chromosome
@@ -100,5 +127,7 @@ namespace genome {
 			 * last gate in chromosome of type input
 			 */
 			io_id_t last_input;
+
+			unsigned gene_inputs_count = MAX_INPUTS;
 	};
 }

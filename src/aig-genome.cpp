@@ -31,12 +31,16 @@ namespace representation {
 
 	}
 
+	unsigned aig::mutate(unsigned center, unsigned sigma) {
+		return this->chromosome->mutate(center, sigma, SAFE_TYPE_ID(0b000), SAFE_TYPE_ID(0b111));
+	}
+
 	genome::io_id_t aig::add_aig_gate(uint16_t type, genome::io_id_t I1, genome::io_id_t I2) {
 		genome::gene gene;
 
 		gene.type = SAFE_TYPE_ID(type);
-		gene.I1   = I1;
-		gene.I2   = I2;
+		gene.Inputs[0]   = I1;
+		gene.Inputs[1]   = I2;
 
 		return this->chromosome->add_gene(gene);
 	}
@@ -45,8 +49,8 @@ namespace representation {
 		genome::gene gene;
 
 		gene.type = SAFE_TYPE_ID(type);
-		gene.I1   = I1;
-		gene.I2   = I2;
+		gene.Inputs[0]   = I1;
+		gene.Inputs[1]   = I2;
 
 		this->chromosome->update_gene(id, gene);
 
