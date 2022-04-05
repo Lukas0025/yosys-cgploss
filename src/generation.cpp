@@ -84,6 +84,11 @@ namespace evolution {
 
 		unsigned total_error = 0;
 		bool done = false;
+
+		if (ONE_SIM_VARIANTS > individual->chromosome->last_input) {
+			done = true;
+		}
+
 		do {
 			individual->simulate(test_circuic);
 			this->reference->simulate(reference_circuic);

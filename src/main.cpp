@@ -233,6 +233,7 @@ struct cgploss : public Pass {
 			log("       selection_size      : %d\n", param_selection_count);
 			log("       generation_size     : %d\n", param_generation_size);
 			log("       max_one_error       : %d\n", param_max_one_loss);
+			log("       max_abs_error       : %f\n", param_max_abs_loss);
 			log("       generations         : %d\n", param_generations_count);
 			log("       mutations_count     : %d\n", param_mutate_center);
 			log("       mutations_sigma     : %d\n", param_mutate_sigma);
