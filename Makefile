@@ -73,3 +73,4 @@ clean:
 	rm -f test_out.v
 	rm -f cgplossUnit.d
 	rm -f cgplossUnit.so
+	rm -f src/test.cpp
