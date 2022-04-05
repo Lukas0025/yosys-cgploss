@@ -83,7 +83,8 @@ namespace evolution {
 		}
 
 		unsigned total_error = 0;
-		while(true) {
+		bool done = false;
+		do {
 			individual->simulate(test_circuic);
 			this->reference->simulate(reference_circuic);
 
@@ -107,16 +108,14 @@ namespace evolution {
 
 					if (i == individual->chromosome->last_input) {
 						if (variant_counter[individual->chromosome->last_input + 1]) {
-							break;
+							done = true;
 						} 
 
 						variant_counter[individual->chromosome->last_input + 1]++;
 					}
 				}
-				continue;
 			}
-			break;
-		}
+		} while (!done);
 
 		unsigned variants_count = 1 << (individual->chromosome->last_input + 1);
 		float    abs_error      = (float) total_error / variants_count;
