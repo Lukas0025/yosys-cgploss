@@ -44,7 +44,7 @@ namespace evolution {
 	void generation::cross(unsigned parrentA, unsigned parrentB, unsigned parts) {
 		std::random_device   rd{};
 		std::mt19937         rand_gen{rd()};
-		std::uniform_int_distribution<genome::io_id_t> rand_pos(this->individuals[parrentA].repres->chromosome->last_input + 1, this->individuals[parrentA].repres->chromosome->size());
+		std::uniform_int_distribution<genome::io_id_t> rand_pos(this->individuals[parrentA].repres->chromosome->last_input + 1, this->individuals[parrentA].repres->chromosome->size() - 1);
 
 		//parts random selection
 		std::vector<genome::io_id_t> crossovers;
