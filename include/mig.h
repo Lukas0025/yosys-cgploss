@@ -7,7 +7,23 @@
 #pragma once
 #include "representation.h"
 
+#define NO_PORT_0_TYPE(X) (UNSAFE_TYPE_ID(X) >> 1)
+#define NO_PORT_1_TYPE(X) ((UNSAFE_TYPE_ID(X) & 0b1)  | ((UNSAFE_TYPE_ID(X) & 0b1100) >> 1))
+#define NO_PORT_2_TYPE(X) ((UNSAFE_TYPE_ID(X) & 0b11) | ((UNSAFE_TYPE_ID(X) & 0b1000) >> 1))
+
 namespace representation {
+
+	const unsigned mig_and_or_gate_costs[] = {
+		6, //000
+		8, //001
+		8, //010
+		4, //011
+		4, //100
+		8, //101
+		8, //110
+		6  //111
+	};
+
 	class mig : public representation {
 		public:
 			mig(genome::genome* chromosome) : representation(chromosome) {
@@ -54,8 +70,18 @@ namespace representation {
 				return this->chromosome->used_cost(mig::gate_power);
 			}
 
-            static unsigned gate_power(genome::gene_t gate) {
-                return (gate.type & 0b1) + ((gate.type >> 1) & 0b1) + ((gate.type >> 2) & 0b1) + ((gate.type >> 3) & 0b1);
+            static unsigned gate_power(genome::gene_t gene) {
+				if (gene.Inputs[0] == 0) return mig_and_or_gate_costs[NO_PORT_0_TYPE(gene.type)];
+				if (gene.Inputs[1] == 0) return mig_and_or_gate_costs[NO_PORT_1_TYPE(gene.type)];
+				if (gene.Inputs[2] == 0) return mig_and_or_gate_costs[NO_PORT_2_TYPE(gene.type)];
+
+				if (gene.Inputs[0] == 1) return mig_and_or_gate_costs[NO_PORT_0_TYPE(gene.type)];
+				if (gene.Inputs[1] == 1) return mig_and_or_gate_costs[NO_PORT_1_TYPE(gene.type)];
+				if (gene.Inputs[2] == 1) return mig_and_or_gate_costs[NO_PORT_2_TYPE(gene.type)];
+
+				auto invertions = UNSAFE_TYPE_ID(gene.type);
+
+                return 30 + 2 * ((invertions & 0b1) + ((invertions >> 1) & 0b1) + ((invertions >> 2) & 0b1) + ((invertions >> 3) & 0b1));
             }
 
 			/**
@@ -88,6 +114,9 @@ namespace representation {
             genome::io_id_t add_nmux(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
 
             Yosys::RTLIL::Cell* rtlil_add_maj3(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
-
+			Yosys::RTLIL::Cell* rtlil_add_or_vars(genome::io_id_t a, genome::io_id_t b, unsigned type, genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell* rtlil_add_and_vars(genome::io_id_t a, genome::io_id_t b, unsigned type, genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell* rtlil_add_and(genome::io_id_t a, genome::io_id_t b, unsigned type, genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
+			Yosys::RTLIL::Cell* rtlil_add_or(genome::io_id_t a, genome::io_id_t b, unsigned type, genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
 	};
 }
