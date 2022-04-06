@@ -252,11 +252,23 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 		for (auto output : to_del) {
 			mapper.out.erase(output);
 		}
+
+		// delete inner wires
+
+		for (auto &it : mod->wires_) {
+			RTLIL::Wire *wire = it.second;
+			if (!wire->port_output && !wire->port_input) { //is inner
+				log("[INFO] load: deleting inner wire %s\n", wire->name.c_str());
+				mod->wires_.erase(wire->name);
+			}
+			
+		}
 	}
 
 	repres->chromosome->order(mapper.in, mapper.out);
 	
 	log("[INFO] load: loaded chromosome with %u gens, %lu inputs and %lu outputs\n", repres->chromosome->size(), mapper.in.size(), mapper.out.size());
+
 
 	return mapper;
 }

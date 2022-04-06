@@ -1,0 +1,6 @@
+read_verilog tests/multi-run/code.v
+techmap
+cgploss -representation=mig -max_abs_error=0 -max_one_error=0
+cgploss -representation=aig -max_abs_error=0 -max_one_error=0
+cgploss -representation=gates -max_abs_error=0 -max_one_error=0
+write_verilog test_out.v
