@@ -325,7 +325,7 @@ struct cgploss : public Pass {
 			
 			genome2design(repres, design);
 		} catch( const std::invalid_argument& e ) {
-			log("error");
+			log("error while loading circuic");
 		}
 
 	}

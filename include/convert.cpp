@@ -281,32 +281,36 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
  */
 void genome2design(representation::representation *repres, Design* design) {
 	std::map<genome::io_id_t, Yosys::RTLIL::SigBit> assign_map;
-	auto mod = design->selected_modules()[0];
 
-	//map inputs
-	for (auto input = repres->chromosome->wire_in.begin(); input != repres->chromosome->wire_in.end(); input++) {
-		assign_map[input->first] = input->second;
-	}
+	for (auto mod : design->selected_modules()) {
 
-	//map outputs
-	for (auto output = repres->chromosome->wire_out.begin(); output != repres->chromosome->wire_out.end(); output++) {
-		assign_map[output->first] = output->second;
-	}
-
-	for (auto id = repres->chromosome->last_input + 1; id < repres->chromosome->size(); id++) {
-
-		//map output if is not mapped
-		if (!assign_map.count(id)) {
-			assign_map[id] = mod->addWire("$cgploss_y_" + std::to_string(id));
+		//map inputs
+		for (auto input = repres->chromosome->wire_in.begin(); input != repres->chromosome->wire_in.end(); input++) {
+			assign_map[input->first] = input->second;
 		}
 
-		auto gate_cell = repres->get_rtlil(id, mod, assign_map, "$cgploss_inner_" + std::to_string(id) + "_");
-
-		if (!gate_cell) {
-			throw std::runtime_error("fail to create gate from chromosome");
+		//map outputs
+		for (auto output = repres->chromosome->wire_out.begin(); output != repres->chromosome->wire_out.end(); output++) {
+			assign_map[output->first] = output->second;
 		}
+
+		for (auto id = repres->chromosome->last_input + 1; id < repres->chromosome->size(); id++) {
+
+			//map output if is not mapped
+			if (!assign_map.count(id)) {
+				assign_map[id] = mod->addWire("$cgploss_y_" + std::to_string(id));
+			}
+
+			auto gate_cell = repres->get_rtlil(id, mod, assign_map, "$cgploss_inner_" + std::to_string(id) + "_");
+
+			if (!gate_cell) {
+				throw std::runtime_error("fail to create gate from chromosome");
+			}
+		}
+
+
+		mod->fixup_ports();
+
+		break;
 	}
-
-
-	mod->fixup_ports();
 }
