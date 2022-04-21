@@ -49,7 +49,7 @@ namespace representation {
 			
 			void simulate(std::vector<simulation::io_t> &gates_o);
 
-			unsigned mutate(unsigned center, unsigned sigma);
+			unsigned mutate(unsigned center, unsigned sigma, unsigned l_back);
 
 			/**
 			 * @brief Get name of parts in genome

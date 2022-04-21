@@ -163,9 +163,9 @@ namespace evolution {
 		return this->individuals.size();
 	}
 
-	void generation::mutate(unsigned from, unsigned to, unsigned center, unsigned sigma) {
+	void generation::mutate(unsigned from, unsigned to, unsigned center, unsigned sigma, unsigned l_back) {
 		for (unsigned i = from; i <= to; i++) {
-			this->individuals[i].repres->mutate(center, sigma);
+			this->individuals[i].repres->mutate(center, sigma, l_back);
 		}
 	}
 

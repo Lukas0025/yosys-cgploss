@@ -38,7 +38,7 @@ namespace representation {
 
 			virtual unsigned power_loss() = 0;
 
-			virtual unsigned mutate(unsigned center, unsigned sigma) = 0;
+			virtual unsigned mutate(unsigned center, unsigned sigma, unsigned l_back) = 0;
 
 			virtual representation* clone() = 0;
 			

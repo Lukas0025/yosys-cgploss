@@ -41,7 +41,7 @@ namespace evolution {
 			unsigned create_kid(unsigned parrentA, unsigned parrentB, std::vector<genome::io_id_t> &crossovers, unsigned part_spec);
 			void cross(unsigned parrentA, unsigned parrentB, unsigned parts = 2);
 			unsigned add_individual(representation::representation *individual);
-			void mutate(unsigned from, unsigned to, unsigned center, unsigned sigma);
+			void mutate(unsigned from, unsigned to, unsigned center, unsigned sigma, unsigned l_back);
 			unsigned size();
 			static bool sort_individual_score_asc(const individual_t &a, const individual_t &b);
 			float score_individual(representation::representation *individual, config::parse *config_parse);

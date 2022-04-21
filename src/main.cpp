@@ -61,6 +61,7 @@ struct cgploss : public Pass {
 		unsigned param_generations_count    = 100;
 		unsigned param_parrents_count       = 1;
 		unsigned param_cross_parts          = 4;
+		unsigned param_l_back               = 0;
 		std::string config_file             = "";
 		std::string param_repres            = "aig";
 
@@ -184,6 +185,20 @@ struct cgploss : public Pass {
 					param_parrents_count = 2;
 				}
 
+			} else if (param.rfind("-l-back=", 0) == 0) {
+				auto parsed = param.substr(std::string("-l-back=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -l-back using default\n");
+				} else {
+					param_l_back = stoi(parsed);
+				}
+
+				if (param_parrents_count < 0) {
+					log("[ERROR] Bad value for l-back, min value is 0. using 0\n");
+					param_l_back = 0;
+				}
+
 			} else {
 				if (param != "cgploss") {
 					log("[WARNING] ignorig argument %s\n", param.c_str());
@@ -241,6 +256,7 @@ struct cgploss : public Pass {
 			log("       cross_parts         : %d\n", param_cross_parts);
 			log("       power_accuracy_ratio: %f\n", param_power_accuracy_ratio);
 			log("       representation      : %s\n\n", param_repres.c_str());
+			log("       l-back              : %d\n\n", param_l_back);
 
 			if (!wire_test) {
 				std::ofstream debug_indiv_file;
@@ -259,7 +275,7 @@ struct cgploss : public Pass {
 					generation->clone(parrent0);
 				}
 
-				generation->mutate(parrent0 + 1, generation->size() - 1, param_mutate_center, param_mutate_sigma);
+				generation->mutate(parrent0 + 1, generation->size() - 1, param_mutate_center, param_mutate_sigma, param_l_back);
 
 				debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION 0\n\n");
 
@@ -284,7 +300,7 @@ struct cgploss : public Pass {
 						}
 					}
 
-					generation->mutate(param_selection_count, generation->size() - 1, param_mutate_center, param_mutate_sigma);
+					generation->mutate(param_selection_count, generation->size() - 1, param_mutate_center, param_mutate_sigma, param_l_back);
 
 					debug_generation_to_file(debug_indiv_file, generation, "\n\nGENERATION " + std::to_string(generation_id) + "\n\n");
 

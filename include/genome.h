@@ -76,7 +76,7 @@ namespace genome {
 			 * @param type_max maximum ID of tzpe of gene (for mutation)
 			 * @return unsigned number of mutations
 			 */
-			unsigned mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max);
+			unsigned mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max, unsigned l_back);
 
 			bool valid();
 
