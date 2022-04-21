@@ -128,6 +128,8 @@ std::vector<genome::io_id_t> rtlil2genome_inputs(RTLIL::Cell* cell, genome::geno
 		inputs.push_back(map_signal(sig_a, mapper, chromosome));
 		inputs.push_back(map_signal(sig_b, mapper, chromosome));
 		inputs.push_back(map_signal(sig_s, mapper, chromosome));
+	} else {
+		throw std::invalid_argument(std::string("unsupported gate ") + cell->name.str());
 	}
 
 	return inputs;
@@ -141,8 +143,8 @@ std::vector<genome::io_id_t> rtlil2genome_inputs(RTLIL::Cell* cell, genome::geno
  * @return genome::cell_gene_t (part of chromosome) must be added to chromosome manualy
  */
 void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, representation::representation *repres, mapper_t *mapper) {
-	auto output = rtlil2genome_out(rtlil_cell, repres->chromosome, mapper);
 	auto inputs = rtlil2genome_inputs(rtlil_cell, repres->chromosome, mapper);
+	auto output = rtlil2genome_out(rtlil_cell, repres->chromosome, mapper);
 
 	repres->add_cell(rtlil_cell->type, inputs, output);
 }
