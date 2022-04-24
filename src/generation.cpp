@@ -1,3 +1,10 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with generation implementation
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
+
 #include "generation.h"
 #include <random>
 #include <algorithm>

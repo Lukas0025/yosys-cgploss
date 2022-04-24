@@ -19,6 +19,11 @@
 #include "representation.h"
 
 namespace representation {
+	/**
+	  * @brief Class for gates representation of circuic
+	  * Gate reprezentation using standart gates in types. Supported gates are:
+	  * AND, NOT, NAND, AND_NOT, OR, NOR, OR_NOT, XOR and XNOR 
+	  */
 	class gates : public representation {
 		public:
 			gates(genome::genome* chromosome) : representation(chromosome) {
@@ -43,8 +48,21 @@ namespace representation {
 			 */
 			Yosys::RTLIL::Cell *get_rtlil(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map, std::string wire_namespace);
 			
+			/**
+			 * @brief Perform simulation on reprezentation
+			 * @param gates_o input/output data structure. Must have .size() == chromozome.size()
+			 * On position of input genes fill with testing input
+			 * On outputs pusition  is outputs of circuic
+			 */
 			void simulate(std::vector<simulation::io_t> &gates_o);
 
+			/**
+			 * @brief Perform muatatin operation over chromozome
+			 * @param center center of random number of mutations
+			 * @param sigma sigma of normal distribution of number of mutations
+			 * @param l_back maximal distance of mutation
+			 * @return unsigned number of mutations
+			 */
 			unsigned mutate(unsigned center, unsigned sigma, unsigned l_back);
 
 			/**
@@ -55,16 +73,29 @@ namespace representation {
 				return "\"gate\": [\"none\", \"A && B\", \"!A\", \"!(A && B)\", \"A && !B\", \"A || B\", \"!(A || B)\", \"A || !B\", \"A ^ B\", \"!(A ^ B)\"]";
 			}
 
+			/**
+			 * @brief Make deep copy of this object
+			 * @return new aig reprezentation 
+			 */
 			gates* clone() {
 				auto repres = new gates(this->chromosome->clone());
 
 				return repres;
 			}
 
+			/**
+			 * @brief Calculate power consumation of circuic
+			 * @return unsigned power consumation
+			 */
 			unsigned power_loss() {
 				return this->chromosome->used_cost(gates::gate_power);
 			}
 
+			/**
+			 * @brief get number of tranzistors of gate tyte
+			 * @param gene gene of gate reprezentation
+			 * @return unsigned number of trazsitors
+			 */
             static unsigned gate_power(genome::gene_t gene) {
 				//by ranzistor count in CMOS
                 if (gene.type == SAFE_TYPE_ID(AND_GATE_ID))    return 6;
@@ -100,6 +131,7 @@ namespace representation {
 			genome::io_id_t update_gate(genome::io_id_t id, uint16_t type, genome::io_id_t I1, genome::io_id_t I2);
 
 		private:
+			// support functions for RTLIL2GENOME
 			genome::io_id_t add_aoi3(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
 			genome::io_id_t add_oai3(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
 			genome::io_id_t add_aoi4(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
@@ -107,6 +139,7 @@ namespace representation {
 			genome::io_id_t add_mux(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
 			genome::io_id_t add_nmux(std::vector<genome::io_id_t> inputs, genome::io_id_t output);
 
+			// support functions for GENOME2RTLIL
 			Yosys::RTLIL::Cell* rtlil_add_andnot(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 			Yosys::RTLIL::Cell* rtlil_add_xor(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);
 			Yosys::RTLIL::Cell* rtlil_add_xnor(genome::io_id_t id, Yosys::RTLIL::Module* mod, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &assign_map);

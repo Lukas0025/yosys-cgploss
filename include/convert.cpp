@@ -265,6 +265,8 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 			}
 			
 		}
+
+		break;
 	}
 
 	repres->chromosome->order(mapper.in, mapper.out);

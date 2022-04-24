@@ -1,6 +1,6 @@
 /**
  * yosys-cgploss - Create circuics using Genetic (CGP)
- * file with aig genome2rtlil inmplemenation
+ * file with mig genome2rtlil inmplemenation
  * @author Lukas Plevac <xpleva07@vutbr.cz>
  */
 

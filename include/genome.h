@@ -16,9 +16,9 @@
 #include "kernel/yosys.h"
 #include "kernel/sigtools.h"
 
-#define DUMMY_GENE_TYPE 0
-#define MAX_INPUTS 3
-#define IO_ID_T_UNUSED 0xFFFFFFFF 
+#define DUMMY_GENE_TYPE 0          // if of dummy gene
+#define MAX_INPUTS 3               // maximal size of inputs array in gene 
+#define IO_ID_T_UNUSED 0xFFFFFFFF  // id of unused input
 
 namespace genome {
 	typedef uint32_t io_id_t;
@@ -29,10 +29,17 @@ namespace genome {
 		io_id_t Inputs[MAX_INPUTS];
 	} gene_t;
 
+	/**
+	 * @brief Class reprezenting genome of individual
+	 */
 	class genome {
 		public:
 			genome();
 
+			/**
+			 * @brief Make deep copy of object
+			 * @return new genome object
+			 */
 			genome *clone();
 
 			/**
@@ -78,8 +85,20 @@ namespace genome {
 			 */
 			unsigned mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max, unsigned l_back);
 
+			/**
+			 * @brief Check if chromozome CGP valid
+			 * @return true 
+			 * @return false 
+			 */
 			bool valid();
 
+			/**
+			 * @brief Check if gane all inputs is <= trashhold
+			 * @param pos position of gene in chromozome
+			 * @param threshold 
+			 * @return true 
+			 * @return false 
+			 */
 			bool is_gene_ins_eqbelow(io_id_t pos, io_id_t threshold);
 			bool sort_asc_by_ins();
 
@@ -90,8 +109,16 @@ namespace genome {
 			 */
 			bool order(std::map<io_id_t, Yosys::RTLIL::SigBit> inputs, std::map<io_id_t, Yosys::RTLIL::SigBit> outputs);
 
+			/**
+			 * @brief Get cost of used genes
+			 * @param gate_power function to calculate power consumating of one gene
+			 * @return unsigned cost
+			 */
 			unsigned used_cost(unsigned (*gate_power)(gene_t));
 
+			/**
+			 * @brief Remove unused genes
+			 */
 			void cut_unused();                                           
 
 			/**
@@ -100,8 +127,17 @@ namespace genome {
 			 */
 			std::string  to_string();
 
+			/**
+			 * @brief Get raw string of chromozome (DEBUG)
+			 * @return std::string 
+			 */
 			std::string raw_string();
 
+			/**
+			 * @brief Get string of gene (DEBUG)
+			 * @param gene to stringfy
+			 * @return std::string 
+			 */
 			std::string gene_str(gene_t gene);
 			
 			/**
@@ -111,6 +147,12 @@ namespace genome {
 			 */
 			gene_t get_gene(io_id_t pos);
 
+			/**
+			 * @brief Get pointer on gene
+			 * 
+			 * @param pos position of gene
+			 * @return pointer on gene in chromozome
+			 */
 			gene_t* get_gene_ptr(io_id_t pos);
 			
 			/**
@@ -128,6 +170,9 @@ namespace genome {
 			 */
 			io_id_t last_input;
 
+			/**
+			 * Size of inputs array in gene (Used size)
+			 */
 			unsigned gene_inputs_count = MAX_INPUTS;
 	};
 }
