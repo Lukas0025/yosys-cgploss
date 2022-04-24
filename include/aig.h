@@ -49,7 +49,7 @@ namespace representation {
 			
 			void simulate(std::vector<simulation::io_t> &gates_o);
 
-			unsigned mutate(unsigned center, unsigned sigma);
+			unsigned mutate(unsigned center, unsigned sigma, unsigned l_back);
 
 			/**
 			 * @brief Get name of parts in genome
@@ -59,26 +59,39 @@ namespace representation {
 				return "\"gate\": [\"none\", \"A && B\", \"!A && B\", \"A && !B\", \"!A && !B\", \"!(A && B)\", \"!(!A && B)\", \"!(A && !B)\", \"!(!A && !B)\"]";
 			}
 
+			/**
+			 * @brief Make deep copy of this object
+			 * @return new aig reprezentation 
+			 */
 			aig* clone() {
 				auto repres = new aig(this->chromosome->clone());
 
 				return repres;
 			}
 
+			/**
+			 * @brief get electic power consumation of curcuic
+			 * @return unsigned power consumation in number of trazsitors
+			 */
 			unsigned power_loss() {
 				return this->chromosome->used_cost(aig::gate_power);
 			}
 
+			/**
+			 * @brief get number of tranzistors of gate tyte
+			 * @param gene gene of gate reprezentation
+			 * @return unsigned number of trazsitors
+			 */
             static unsigned gate_power(genome::gene_t gene) {
 				if (gene.type == SAFE_TYPE_ID(0b000) && gene.Inputs[0] == gene.Inputs[1]) return 2; //buffer
 				if (gene.type == SAFE_TYPE_ID(0b000)) return 6; //AND
-				if (gene.type == SAFE_TYPE_ID(0b001)) return 9; //AND NOT A
+				if (gene.type == SAFE_TYPE_ID(0b001)) return 8; //AND NOT A
 				if (gene.type == SAFE_TYPE_ID(0b010)) return 8; //AND NOT
 				if (gene.type == SAFE_TYPE_ID(0b011)) return 4; //NOR
 				if (gene.type == SAFE_TYPE_ID(0b100) && gene.Inputs[0] == gene.Inputs[1]) return 2; //not
 				if (gene.type == SAFE_TYPE_ID(0b100)) return 4; //NAND
 				if (gene.type == SAFE_TYPE_ID(0b101)) return 8; //OR NOT
-				if (gene.type == SAFE_TYPE_ID(0b110)) return 9; //OR NOT A
+				if (gene.type == SAFE_TYPE_ID(0b110)) return 8; //OR NOT A
 				if (gene.type == SAFE_TYPE_ID(0b111)) return 6; //OR
 
 				return 1;

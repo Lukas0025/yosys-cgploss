@@ -1,0 +1,10 @@
+read_verilog tests/abc-multi-run/code.v
+techmap
+abc
+cgploss -representation=mig -max_abs_error=0 -max_one_error=0
+abc
+cgploss -representation=aig -max_abs_error=0 -max_one_error=0
+abc
+cgploss -representation=gates -max_abs_error=0 -max_one_error=0
+abc
+write_verilog test_out.v

@@ -1,0 +1,4 @@
+read_verilog tests/1badder-gates-cgp/code.v
+techmap
+cgploss -representation=gates -max_abs_error=0 -max_one_error=0
+write_verilog test_out.v

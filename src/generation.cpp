@@ -1,3 +1,10 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with generation implementation
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
+
 #include "generation.h"
 #include <random>
 #include <algorithm>
@@ -44,7 +51,7 @@ namespace evolution {
 	void generation::cross(unsigned parrentA, unsigned parrentB, unsigned parts) {
 		std::random_device   rd{};
 		std::mt19937         rand_gen{rd()};
-		std::uniform_int_distribution<genome::io_id_t> rand_pos(this->individuals[parrentA].repres->chromosome->last_input + 1, this->individuals[parrentA].repres->chromosome->size());
+		std::uniform_int_distribution<genome::io_id_t> rand_pos(this->individuals[parrentA].repres->chromosome->last_input + 1, this->individuals[parrentA].repres->chromosome->size() - 1);
 
 		//parts random selection
 		std::vector<genome::io_id_t> crossovers;
@@ -83,7 +90,13 @@ namespace evolution {
 		}
 
 		unsigned total_error = 0;
-		while(true) {
+		bool done = false;
+
+		if (ONE_SIM_VARIANTS > individual->chromosome->last_input) {
+			done = true;
+		}
+
+		do {
 			individual->simulate(test_circuic);
 			this->reference->simulate(reference_circuic);
 
@@ -107,16 +120,14 @@ namespace evolution {
 
 					if (i == individual->chromosome->last_input) {
 						if (variant_counter[individual->chromosome->last_input + 1]) {
-							break;
+							done = true;
 						} 
 
 						variant_counter[individual->chromosome->last_input + 1]++;
 					}
 				}
-				continue;
 			}
-			break;
-		}
+		} while (!done);
 
 		unsigned variants_count = 1 << (individual->chromosome->last_input + 1);
 		float    abs_error      = (float) total_error / variants_count;
@@ -159,9 +170,9 @@ namespace evolution {
 		return this->individuals.size();
 	}
 
-	void generation::mutate(unsigned from, unsigned to, unsigned center, unsigned sigma) {
+	void generation::mutate(unsigned from, unsigned to, unsigned center, unsigned sigma, unsigned l_back) {
 		for (unsigned i = from; i <= to; i++) {
-			this->individuals[i].repres->mutate(center, sigma);
+			this->individuals[i].repres->mutate(center, sigma, l_back);
 		}
 	}
 

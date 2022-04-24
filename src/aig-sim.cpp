@@ -1,3 +1,10 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with simulation of AIG
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
+
 #include "aig.h"
 
 namespace representation {

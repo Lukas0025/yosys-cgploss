@@ -1,3 +1,10 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with simulation of gate reprezenation
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
+
 #include "gates.h"
 
 namespace representation {

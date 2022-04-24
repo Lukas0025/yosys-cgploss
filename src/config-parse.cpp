@@ -1,3 +1,10 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with implementation of config parser
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
+
 #include "config-parse.h"
 #include <algorithm>
 

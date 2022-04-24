@@ -35,8 +35,8 @@ namespace representation {
 
 	}
 
-	unsigned mig::mutate(unsigned center, unsigned sigma) {
-		return this->chromosome->mutate(center, sigma, SAFE_TYPE_ID(0b0000), SAFE_TYPE_ID(0b1111));
+	unsigned mig::mutate(unsigned center, unsigned sigma, unsigned l_back) {
+		return this->chromosome->mutate(center, sigma, SAFE_TYPE_ID(0b0000), SAFE_TYPE_ID(0b1111), l_back);
 	}
 
 	genome::io_id_t mig::add_mig_gate(uint16_t type, genome::io_id_t I1, genome::io_id_t I2, genome::io_id_t I3) {

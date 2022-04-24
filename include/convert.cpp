@@ -128,6 +128,8 @@ std::vector<genome::io_id_t> rtlil2genome_inputs(RTLIL::Cell* cell, genome::geno
 		inputs.push_back(map_signal(sig_a, mapper, chromosome));
 		inputs.push_back(map_signal(sig_b, mapper, chromosome));
 		inputs.push_back(map_signal(sig_s, mapper, chromosome));
+	} else {
+		throw std::invalid_argument(std::string("unsupported gate ") + cell->name.str());
 	}
 
 	return inputs;
@@ -141,8 +143,8 @@ std::vector<genome::io_id_t> rtlil2genome_inputs(RTLIL::Cell* cell, genome::geno
  * @return genome::cell_gene_t (part of chromosome) must be added to chromosome manualy
  */
 void rtlil2genome_cell(RTLIL::Cell* rtlil_cell, representation::representation *repres, mapper_t *mapper) {
-	auto output = rtlil2genome_out(rtlil_cell, repres->chromosome, mapper);
 	auto inputs = rtlil2genome_inputs(rtlil_cell, repres->chromosome, mapper);
+	auto output = rtlil2genome_out(rtlil_cell, repres->chromosome, mapper);
 
 	repres->add_cell(rtlil_cell->type, inputs, output);
 }
@@ -252,11 +254,25 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 		for (auto output : to_del) {
 			mapper.out.erase(output);
 		}
+
+		// delete inner wires
+
+		for (auto &it : mod->wires_) {
+			RTLIL::Wire *wire = it.second;
+			if (!wire->port_output && !wire->port_input) { //is inner
+				log("[INFO] load: deleting inner wire %s\n", wire->name.c_str());
+				mod->wires_.erase(wire->name);
+			}
+			
+		}
+
+		break;
 	}
 
 	repres->chromosome->order(mapper.in, mapper.out);
 	
 	log("[INFO] load: loaded chromosome with %u gens, %lu inputs and %lu outputs\n", repres->chromosome->size(), mapper.in.size(), mapper.out.size());
+
 
 	return mapper;
 }
@@ -269,32 +285,36 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
  */
 void genome2design(representation::representation *repres, Design* design) {
 	std::map<genome::io_id_t, Yosys::RTLIL::SigBit> assign_map;
-	auto mod = design->selected_modules()[0];
 
-	//map inputs
-	for (auto input = repres->chromosome->wire_in.begin(); input != repres->chromosome->wire_in.end(); input++) {
-		assign_map[input->first] = input->second;
-	}
+	for (auto mod : design->selected_modules()) {
 
-	//map outputs
-	for (auto output = repres->chromosome->wire_out.begin(); output != repres->chromosome->wire_out.end(); output++) {
-		assign_map[output->first] = output->second;
-	}
-
-	for (auto id = repres->chromosome->last_input + 1; id < repres->chromosome->size(); id++) {
-
-		//map output if is not mapped
-		if (!assign_map.count(id)) {
-			assign_map[id] = mod->addWire("$cgploss_y_" + std::to_string(id));
+		//map inputs
+		for (auto input = repres->chromosome->wire_in.begin(); input != repres->chromosome->wire_in.end(); input++) {
+			assign_map[input->first] = input->second;
 		}
 
-		auto gate_cell = repres->get_rtlil(id, mod, assign_map, "$cgploss_inner_" + std::to_string(id) + "_");
-
-		if (!gate_cell) {
-			throw std::runtime_error("fail to create gate from chromosome");
+		//map outputs
+		for (auto output = repres->chromosome->wire_out.begin(); output != repres->chromosome->wire_out.end(); output++) {
+			assign_map[output->first] = output->second;
 		}
+
+		for (auto id = repres->chromosome->last_input + 1; id < repres->chromosome->size(); id++) {
+
+			//map output if is not mapped
+			if (!assign_map.count(id)) {
+				assign_map[id] = mod->addWire("$cgploss_y_" + std::to_string(id));
+			}
+
+			auto gate_cell = repres->get_rtlil(id, mod, assign_map, "$cgploss_inner_" + std::to_string(id) + "_");
+
+			if (!gate_cell) {
+				throw std::runtime_error("fail to create gate from chromosome");
+			}
+		}
+
+
+		mod->fixup_ports();
+
+		break;
 	}
-
-
-	mod->fixup_ports();
 }

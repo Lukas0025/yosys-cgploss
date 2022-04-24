@@ -31,8 +31,8 @@ namespace representation {
 
 	}
 
-	unsigned aig::mutate(unsigned center, unsigned sigma) {
-		return this->chromosome->mutate(center, sigma, SAFE_TYPE_ID(0b000), SAFE_TYPE_ID(0b111));
+	unsigned aig::mutate(unsigned center, unsigned sigma, unsigned l_back) {
+		return this->chromosome->mutate(center, sigma, SAFE_TYPE_ID(0b000), SAFE_TYPE_ID(0b111), l_back);
 	}
 
 	genome::io_id_t aig::add_aig_gate(uint16_t type, genome::io_id_t I1, genome::io_id_t I2) {
