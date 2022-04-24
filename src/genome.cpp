@@ -77,6 +77,7 @@ namespace genome {
 		std::normal_distribution<>             rand_numof_muts(center, sigma);
 		std::uniform_int_distribution<io_id_t> rand_mut_pos(this->last_input + 1, this->size() + this->wire_out.size() - 1);
 		std::uniform_int_distribution<io_id_t> rand_type(type_min, type_max);
+		std::uniform_int_distribution<io_id_t> rand_mut_gen_pos(0, this->gene_inputs_count);
 
 		int mutations = std::round(rand_numof_muts(rand_gen));
 		if (mutations <= 0) return 0; //no mutations
@@ -109,16 +110,17 @@ namespace genome {
 				
 			} else { //regular gene
 				auto mut_gene = this->get_gene_ptr(rand_pos);
+				auto mut_pos_in_gene = rand_mut_gen_pos(rand_gen);
 
 				//generate random for gene inputs
-				for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+				if (this->gene_inputs_count != mut_pos_in_gene) {
 					int rand_pos_min = 0;
 					int rand_pos_max = rand_pos - 1;
 
 					// l_back is enabled
 					if (l_back > 0) {
-						rand_pos_min = mut_gene->Inputs[i] - l_back;
-						rand_pos_max = mut_gene->Inputs[i] + l_back;
+						rand_pos_min = mut_gene->Inputs[mut_pos_in_gene] - l_back;
+						rand_pos_max = mut_gene->Inputs[mut_pos_in_gene] + l_back;
 
 						if (rand_pos_min < 0)                  rand_pos_min = 0;
 						if ((io_id_t)rand_pos_max >= rand_pos) rand_pos_max = rand_pos - 1;
@@ -127,11 +129,11 @@ namespace genome {
 					std::uniform_int_distribution<io_id_t> rand_mut_inputs(rand_pos_min, rand_pos_max);
 					
 
-					mut_gene->Inputs[i] = rand_mut_inputs(rand_gen);
+					mut_gene->Inputs[mut_pos_in_gene] = rand_mut_inputs(rand_gen);
+				} else {
+					//type mutation
+					mut_gene->type = rand_type(rand_gen);
 				}
-
-				//type mutation
-				mut_gene->type = rand_type(rand_gen);
 			}
 		}
 
