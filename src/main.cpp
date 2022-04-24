@@ -51,6 +51,7 @@ struct cgploss : public Pass {
 		/* Params parsing */
 		bool wire_test                      = false;
 		bool debug_indiv                    = false;
+		bool param_profile                  = false;
 		unsigned param_selection_count      = 50;
 		unsigned param_generation_size      = 500;
 		unsigned param_max_one_loss         = 0;
@@ -74,6 +75,8 @@ struct cgploss : public Pass {
 				debug_indiv = true;
 			} else if (param == "-status") {
 				param_status = true;
+			} else if (param == "-profile") {
+				param_profile = true;
 			} else if (param.rfind("-ports_weights=", 0) == 0) {
 				config_file = param.substr(std::string("-ports_weights=").length());
 			} else if (param.rfind("-selection_size=", 0) == 0) {
@@ -312,6 +315,9 @@ struct cgploss : public Pass {
 
 					if (param_status) {
 						log("[INFO] generation %i best individual score %f\n",  generation_id, generation->individuals[0].score);
+					} else if (param_profile) {
+						auto p_loss = generation->individuals[0].repres->power_loss();
+						log("%i-%f-%f;", p_loss, generation->individuals[0].score - (p_loss * param_power_accuracy_ratio), generation->individuals[0].score);
 					}
 				}
 
