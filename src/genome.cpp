@@ -71,7 +71,7 @@ namespace genome {
 		return true;
 	}
 
-	unsigned genome::mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max) {
+	unsigned genome::mutate(unsigned center, unsigned sigma, uint16_t type_min, uint16_t type_max, unsigned l_back) {
 		std::random_device                     rd{};
 		std::mt19937                           rand_gen{rd()};
 		std::normal_distribution<>             rand_numof_muts(center, sigma);
@@ -109,11 +109,24 @@ namespace genome {
 				
 			} else { //regular gene
 				auto mut_gene = this->get_gene_ptr(rand_pos);
-				
-				//generate random for gene inputs
-				std::uniform_int_distribution<io_id_t> rand_mut_inputs(0, rand_pos - 1);
 
+				//generate random for gene inputs
 				for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+					int rand_pos_min = 0;
+					int rand_pos_max = rand_pos - 1;
+
+					// l_back is enabled
+					if (l_back > 0) {
+						rand_pos_min = mut_gene->Inputs[i] - l_back;
+						rand_pos_max = mut_gene->Inputs[i] + l_back;
+
+						if (rand_pos_min < 0)                  rand_pos_min = 0;
+						if ((io_id_t)rand_pos_max >= rand_pos) rand_pos_max = rand_pos - 1;
+					}
+
+					std::uniform_int_distribution<io_id_t> rand_mut_inputs(rand_pos_min, rand_pos_max);
+					
+
 					mut_gene->Inputs[i] = rand_mut_inputs(rand_gen);
 				}
 

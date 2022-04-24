@@ -1,3 +1,9 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with MIG simulation
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
 #include "mig.h"
 
 #define maj3(I1, I2, I3) ((I1 & I2) | (I2 & I3) | (I1 & I3))

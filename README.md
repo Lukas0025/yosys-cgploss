@@ -32,6 +32,7 @@ options:
 	-max_abs_error=num         maximal accepted abs error of circuic (all combinations)
 	-representation={aig, gates, mig}  repreyenation of circuic for CGP
 	-cross_parts=2..inf        number of crossovers for cross individuals
+	-l-back                    number for mutation. how many back gates can use this gate 
 ```
 
 #### example run

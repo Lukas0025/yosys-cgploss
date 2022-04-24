@@ -1,3 +1,10 @@
+/**
+ * yosys-cgploss - Create circuics using Genetic (CGP)
+ * file with simulation support functions
+ * @author Lukas Plevac <xpleva07@vutbr.cz>
+ */
+
+
 #include "simulation.h"
 
 namespace simulation {
