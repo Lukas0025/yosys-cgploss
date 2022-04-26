@@ -133,20 +133,20 @@ struct cgploss : public Pass {
 					param_mutate_sigma = stoi(parsed);
 				}
 
-			} else if (param.rfind("-parrents=", 0) == 0) {
-				auto parsed = param.substr(std::string("-parrents=").length());
+			} else if (param.rfind("-parents=", 0) == 0) {
+				auto parsed = param.substr(std::string("-parents=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					log("[ERROR] Bad value for -parrents using default\n");
+					log("[ERROR] Bad value for -parents using default\n");
 				} else {
 					param_parrents_count = stoi(parsed);
 				}
 
 				if (param_parrents_count > 2) {
-					log("[ERROR] Bad value for -parrents, max value is 2, min value is 1. using 2\n");
+					log("[ERROR] Bad value for -parents, max value is 2, min value is 1. using 2\n");
 					param_parrents_count = 2;
 				} else if (param_parrents_count < 1) {
-					log("[ERROR] Bad value for -parrents, max value is 2, min value is 1. using 1\n");
+					log("[ERROR] Bad value for -parents, max value is 2, min value is 1. using 1\n");
 					param_parrents_count = 1;
 				}
 
@@ -238,7 +238,7 @@ struct cgploss : public Pass {
 			}
 
 			if (param_parrents_count == 2 && param_selection_count < 2) {
-				log("[ERROR] minimal selection_count for two parrents is 2. setting to 2\n");
+				log("[ERROR] minimal selection_count for two parents is 2. setting to 2\n");
 				param_selection_count = 2;
 			}
 
@@ -258,7 +258,7 @@ struct cgploss : public Pass {
 			log("       generations         : %d\n", param_generations_count);
 			log("       mutations_count     : %d\n", param_mutate_center);
 			log("       mutations_sigma     : %d\n", param_mutate_sigma);
-			log("       parrents            : %d\n", param_parrents_count);
+			log("       parents             : %d\n", param_parrents_count);
 			log("       cross_parts         : %d\n", param_cross_parts);
 			log("       power_accuracy_ratio: %f\n", param_power_accuracy_ratio);
 			log("       representation      : %s\n", param_repres.c_str());

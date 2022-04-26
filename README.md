@@ -1,11 +1,11 @@
 # CGP Loss optimalization YOSYS extension
 
-use genetic algoritms for optimalize circuics
+use genetic algoritms for optimalize circuics with accepted error on output or without it.
 
 
 ## Getting Started
 
-CGP Loss optimalization shortly `cgploss` is YOSYS extension. For run it you need YOSYS (https://github.com/YosysHQ/yosys) after you build and install YOSYS you can use this extension. Firstly you need load `cgploss` as extension in yosys
+CGP Loss optimalization shortly `cgploss` is YOSYS extension. For run it you need YOSYS (https://github.com/YosysHQ/yosys) after you build and install YOSYS you can use this extension. Firstly you need load `cgploss` as extension in yosys. The goal of CGP Loss is create optimalized circuic with small output error and minimalize amount of electic power to run this circuic.
 
 ```bash
 yosys -m cgploss.so
@@ -19,20 +19,21 @@ cgploss [options]
 
 options:
 	-wire-test                 test load and save part, do not use CGP only load and save [DEBUG]
-	-save_individuals=file     create debug file with all individuals
+	-save_individuals=file     create debug file with all individuals [DEBUG]
 	-ports_weights=file        ports weights file
 	-selection_size=size       size of selected individuals on end of generation
-	-generation_size=size      number of infividuals in generation
+	-generation_size=size      number of individuals in generation
 	-max_one_error=0..inf      maximal accepted error of circuic (one combination)
 	-generations=count         count of generations
 	-mutations_count=count     number of mutation for center of normal distribution
 	-mutations_count_sigma=num sigma for normal distribution
-	-parrents=1..2             number of parrents for individual
+	-parents=1..2              number of parents for kid
 	-power_accuracy_ratio=0..1 float number for loss (1 - power_accuracy_ratio) * abs_error + power_accuracy_ratio * power_loss
 	-max_abs_error=num         maximal accepted abs error of circuic (all combinations)
-	-representation={aig, gates, mig}  repreyenation of circuic for CGP
-	-cross_parts=2..inf        number of crossovers for cross individuals
+	-cross_parts=2..inf        number of crossover points for cross individuals
 	-l-back                    number for mutation. how many back gates can use this gate 
+
+	-representation={aig, gates, mig}  reprezenation of circuic for CGP
 ```
 
 #### example run
@@ -61,14 +62,25 @@ ports.cfg
 \uart_tx: 2 4 8 10
 ```
 
+## After clone
+
+After clone you need init all git submodules for success build. You can init submodule using this commands.
+
+```bash
+git submodule init
+git submodule update
+```
+
 ## Building
 
-For build you need forder with YOSYS source codes, this forder is included as git submodule `yosys`. Build as it self can be run using makefile using simple make command
+For build you need forder with YOSYS source codes, this forder is included as git submodule `yosys`. Build as it self can be run using makefile using simple make command.
 
 need packages `build-essential clang`
 
 ```bash
 make
+# or multicore with package 𝑙𝑖𝑏𝑜𝑚𝑝−𝑑𝑒𝑣
+make multicore
 ```
 
 ## Running tests
