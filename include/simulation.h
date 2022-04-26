@@ -25,15 +25,20 @@
 
 //macro for set variant to vector by variant index
 #define SET_VARIANTS_BITS(VEC, X) { \
-	if      (X == 0) VEC = VARIANTS_BITS_A; \
-	else if (X == 1) VEC = VARIANTS_BITS_B; \
-	else if (X == 2) VEC = VARIANTS_BITS_C; \
-	else if (X == 3) VEC = VARIANTS_BITS_D; \
-	else if (X == 4) VEC = VARIANTS_BITS_E; \
-	else if (X == 5) VEC = VARIANTS_BITS_F; \
-	else if (X == 6) VEC = VARIANTS_BITS_G; \
-	else if (X == 7) VEC = VARIANTS_BITS_H; \
-	else VEC = VARIANTS_BITS_ALL0; \
+	if      (X == 0) SET_VECTOR_TO(VEC, VARIANTS_BITS_A) \
+	else if (X == 1) SET_VECTOR_TO(VEC, VARIANTS_BITS_B) \
+	else if (X == 2) SET_VECTOR_TO(VEC, VARIANTS_BITS_C) \
+	else if (X == 3) SET_VECTOR_TO(VEC, VARIANTS_BITS_D) \
+	else if (X == 4) SET_VECTOR_TO(VEC, VARIANTS_BITS_E) \
+	else if (X == 5) SET_VECTOR_TO(VEC, VARIANTS_BITS_F) \
+	else if (X == 6) SET_VECTOR_TO(VEC, VARIANTS_BITS_G) \
+	else if (X == 7) SET_VECTOR_TO(VEC, VARIANTS_BITS_H) \
+	else SET_VECTOR_TO(VEC, VARIANTS_BITS_ALL0) \
+}
+
+#define SET_VECTOR_TO(VEC, X) { \
+	simulation::io_vector_t tmp = X; \
+	VEC = tmp;\
 }
 
 #include <inttypes.h>

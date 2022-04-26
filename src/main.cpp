@@ -200,11 +200,6 @@ struct cgploss : public Pass {
 					param_l_back = stoi(parsed);
 				}
 
-				if (param_parrents_count < 0) {
-					log("[ERROR] Bad value for l-back, min value is 0. using 0\n");
-					param_l_back = 0;
-				}
-
 			} else {
 				if (param != "cgploss") {
 					log("[WARNING] ignorig argument %s\n", param.c_str());

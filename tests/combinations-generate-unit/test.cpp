@@ -30,7 +30,7 @@ PRIVATE_NAMESPACE_BEGIN
 void assert(std::string name, simulation::io_t output, unsigned pos, bool inverted = false) {
 	simulation::io_t ref;
 
-	SET_VARIANTS_BITS(ref, pos);
+	SET_VARIANTS_BITS(ref.vec, pos);
 
 	if (inverted) {
 		ref.vec = ~ref.vec;
@@ -74,7 +74,7 @@ struct cgploss : public Pass {
 				log("I%d  - %d - ", j, variant_counter[j]);
 
 				for (unsigned h = 0; h < SIM_BYTES_COUNT; h++) {
-					log("%x", test_circuic[j].byte[h]);
+					log("%02x", test_circuic[j].byte[h]);
 				}
 
 				log("\n"); 
