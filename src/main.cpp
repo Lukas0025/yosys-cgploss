@@ -21,6 +21,8 @@
 #include <fstream>
 #include <stdexcept>
 #include <regex>
+//timer
+#include <chrono>
 
 //representations
 #include "aig.h"
@@ -63,7 +65,8 @@ struct cgploss : public Pass {
 		unsigned param_parrents_count       = 1;
 		unsigned param_cross_parts          = 4;
 		unsigned param_l_back               = 0;
-		unsigned param_status               = false;
+		bool     param_status               = false;
+		unsigned param_max_duration         = 0;
 		std::string config_file             = "";
 		std::string param_repres            = "aig";
 
@@ -88,6 +91,20 @@ struct cgploss : public Pass {
 					param_selection_count = stoi(parsed);
 				}
 
+				if (param_selection_count < 1) {
+					log("[ERROR] Bad value for -selection_size, min value is 1. using 1\n");
+					param_selection_count = 1;
+				}
+
+			} else if (param.rfind("-max_duration=", 0) == 0) {
+				auto parsed = param.substr(std::string("-max_duration=").length());
+
+				if (!config::parse::is_number(parsed)) {
+					log("[ERROR] Bad value for -max_duration using default\n");
+				} else {
+					param_max_duration = stoi(parsed);
+				}
+
 			} else if (param.rfind("-generation_size=", 0) == 0) {
 				auto parsed = param.substr(std::string("-generation_size=").length());
 
@@ -95,6 +112,11 @@ struct cgploss : public Pass {
 					log("[ERROR] Bad value for -generation_size using default\n");
 				} else {
 					param_generation_size = stoi(parsed);
+				}
+
+				if (param_generation_size < 2) {
+					log("[ERROR] Bad value for -generation_size, min value is 2. using 2\n");
+					param_generation_size = 2;
 				}
 
 			} else if (param.rfind("-max_one_error=", 0) == 0) {
@@ -268,8 +290,9 @@ struct cgploss : public Pass {
 
 				debug_indiv_to_file(debug_indiv_file, repres);
 
-				auto generation = new evolution::generation(repres, param_max_one_loss, param_max_abs_loss, param_power_accuracy_ratio);
-				auto parrent0   = generation->add_individual(repres->clone());
+				auto generation  = new evolution::generation(repres, param_max_one_loss, param_max_abs_loss, param_power_accuracy_ratio);
+				auto parrent0    = generation->add_individual(repres->clone());
+				auto timer_start = std::chrono::high_resolution_clock::now();
 
 				//create generation using clone
 				for (unsigned i = 0; i < param_generation_size; i++) {
@@ -313,6 +336,19 @@ struct cgploss : public Pass {
 					} else if (param_profile) {
 						auto p_loss = generation->individuals[0].repres->power_loss();
 						log("%i-%f-%f;", p_loss, generation->individuals[0].score - (p_loss * param_power_accuracy_ratio), generation->individuals[0].score);
+					}
+
+					if (param_max_duration > 0) {
+						auto timer_stop   = std::chrono::high_resolution_clock::now();
+						auto act_duration = std::chrono::duration_cast<std::chrono::minutes>(timer_stop - timer_start);
+
+						if (act_duration.count() >= param_max_duration) {
+							if (param_status) {
+								log("[INFO] maximal duration reached\n");
+							}
+
+							break;
+						}
 					}
 				}
 

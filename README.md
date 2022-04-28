@@ -32,6 +32,9 @@ options:
 	-max_abs_error=num         maximal accepted abs error of circuic (all combinations)
 	-cross_parts=2..inf        number of crossover points for cross individuals
 	-l-back                    number for mutation. how many back gates can use this gate 
+	-status                    show complete generations ids and best loss
+	-profile                   for profile extesion print data in format {tranzistros}-{output error}-{score};
+	-max_duration=1..inf       maximal time duration of optimalization in minutes 
 
 	-representation={aig, gates, mig}  reprezenation of circuic for CGP
 ```
