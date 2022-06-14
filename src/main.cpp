@@ -14,6 +14,7 @@
 #include "generation.h"
 #include "config-parse.h"
 
+//Base libs
 #include <string>
 #include <map>
 #include <set>
@@ -21,6 +22,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <regex>
+
 //timer
 #include <chrono>
 
@@ -29,6 +31,10 @@
 #include "gates.h"
 #include "mig.h"
 
+//about
+#include "about.h"
+
+//Debug macros
 #define debug_indiv_to_file(debug_indiv_file, repres) if (debug_indiv) {repres->save(debug_indiv_file); }
 #define debug_generation_to_file(debug_indiv_file, generation, name) if (debug_indiv) {debug_indiv_file << name; for (unsigned i = 0; i < generation->individuals.size(); i++) { debug_indiv_to_file(debug_indiv_file, generation->individuals[i].repres) } }
 
@@ -42,9 +48,7 @@ struct cgploss : public Pass {
 	cgploss() : Pass("cgploss") {}
 
 	void help() override {
-		log("\n");
-		log("    cgploss [options]\n");
-		log("\n");
+		about::print_help(log);
 	}
 
 	void execute(vector<string> params, Design* design) override {
