@@ -39,32 +39,32 @@
 #define debug_generation_to_file(debug_indiv_file, generation, name) if (debug_indiv) {debug_indiv_file << name; for (unsigned i = 0; i < generation->individuals.size(); i++) { debug_indiv_to_file(debug_indiv_file, generation->individuals[i].repres) } }
 
 //messages macros
-#define info_message(...) if (param_status) { log(__VA_ARGS__); }
-#define warning_message(...) log(__VA_ARGS__)
-#define error_message(...) log(__VA_ARGS__)
+#define info_message(...) if (param_status) { log("[INFO] " __VA_ARGS__); }
+#define warning_message(...) log("[WARNING] " __VA_ARGS__)
+#define error_message(...) log("[ERROR] " __VA_ARGS__)
 
 USING_YOSYS_NAMESPACE
 PRIVATE_NAMESPACE_BEGIN
 
 /* Params parsing */
-bool wire_test                      = false;
-bool debug_indiv                    = false;
-bool param_profile                  = false;
-unsigned param_selection_count      = 50;
-unsigned param_generation_size      = 500;
-unsigned param_max_one_loss         = 0;
-float    param_power_accuracy_ratio = 0.5;
-float    param_max_abs_loss         = 0;
-unsigned param_mutate_center        = 2;
-unsigned param_mutate_sigma         = 2;
-unsigned param_generations_count    = 100;
-unsigned param_parrents_count       = 1;
-unsigned param_cross_parts          = 4;
-unsigned param_l_back               = 0;
-bool     param_status               = false;
-unsigned param_max_duration         = 0;
-std::string config_file             = "";
-std::string param_repres            = "aig";
+bool wire_test;
+bool debug_indiv;
+bool param_profile;
+unsigned param_selection_count;
+unsigned param_generation_size;
+unsigned param_max_one_loss;
+float    param_power_accuracy_ratio;
+float    param_max_abs_loss;
+unsigned param_mutate_center;
+unsigned param_mutate_sigma;
+unsigned param_generations_count;
+unsigned param_parrents_count;
+unsigned param_cross_parts;
+unsigned param_l_back;
+bool     param_status;
+unsigned param_max_duration;
+std::string config_file;
+std::string param_repres;
 
 //include convert functions
 #include "convert.cpp"
@@ -78,6 +78,25 @@ struct cgploss : public Pass {
 
 	void execute(vector<string> params, Design* design) override {
 		log("\nStarting cgploss extension. If you need more runtime information use -status\n\n");
+
+		wire_test                  = false;
+		debug_indiv                = false;
+		param_profile              = false;
+		param_selection_count      = 50;
+		param_generation_size      = 500;
+		param_max_one_loss         = 0;
+		param_power_accuracy_ratio = 0.5;
+		param_max_abs_loss         = 0;
+		param_mutate_center        = 2;
+		param_mutate_sigma         = 2;
+		param_generations_count    = 100;
+		param_parrents_count       = 1;
+		param_cross_parts          = 4;
+		param_l_back               = 0;
+		param_status               = false;
+		param_max_duration         = 0;
+		std::string config_file    = "";
+		std::string param_repres   = "aig";
 
 		for (auto param : params) {
 			
@@ -95,13 +114,13 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-selection_size=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -selection_size using default\n");
+					error_message("Bad value for -selection_size using default\n");
 				} else {
 					param_selection_count = stoi(parsed);
 				}
 
 				if (param_selection_count < 1) {
-					error_message("[ERROR] Bad value for -selection_size, min value is 1. using 1\n");
+					error_message("Bad value for -selection_size, min value is 1. using 1\n");
 					param_selection_count = 1;
 				}
 
@@ -109,7 +128,7 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-max_duration=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -max_duration using default\n");
+					error_message("Bad value for -max_duration using default\n");
 				} else {
 					param_max_duration = stoi(parsed);
 				}
@@ -118,13 +137,13 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-generation_size=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -generation_size using default\n");
+					error_message("Bad value for -generation_size using default\n");
 				} else {
 					param_generation_size = stoi(parsed);
 				}
 
 				if (param_generation_size < 2) {
-					error_message("[ERROR] Bad value for -generation_size, min value is 2. using 2\n");
+					error_message("Bad value for -generation_size, min value is 2. using 2\n");
 					param_generation_size = 2;
 				}
 
@@ -132,7 +151,7 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-max_one_error=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -max_one_error using default\n");
+					error_message("Bad value for -max_one_error using default\n");
 				} else {
 					param_max_one_loss = stoi(parsed);
 				}
@@ -141,7 +160,7 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-generations=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -generations using default\n");
+					error_message("Bad value for -generations using default\n");
 				} else {
 					param_generations_count = stoi(parsed);
 				}
@@ -150,7 +169,7 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-mutations_count=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -mutations_count using default\n");
+					error_message("Bad value for -mutations_count using default\n");
 				} else {
 					param_mutate_center = stoi(parsed);
 				}
@@ -159,7 +178,7 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-mutations_count_sigma=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -mutations_count_sigma using default\n");
+					error_message("Bad value for -mutations_count_sigma using default\n");
 				} else {
 					param_mutate_sigma = stoi(parsed);
 				}
@@ -168,16 +187,16 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-parents=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -parents using default\n");
+					error_message("Bad value for -parents using default\n");
 				} else {
 					param_parrents_count = stoi(parsed);
 				}
 
 				if (param_parrents_count > 2) {
-					error_message("[ERROR] Bad value for -parents, max value is 2, min value is 1. using 2\n");
+					error_message("Bad value for -parents, max value is 2, min value is 1. using 2\n");
 					param_parrents_count = 2;
 				} else if (param_parrents_count < 1) {
-					error_message("[ERROR] Bad value for -parents, max value is 2, min value is 1. using 1\n");
+					error_message("Bad value for -parents, max value is 2, min value is 1. using 1\n");
 					param_parrents_count = 1;
 				}
 
@@ -187,7 +206,7 @@ struct cgploss : public Pass {
 				try {
         			param_power_accuracy_ratio = std::stof(parsed);
     			} catch (std::invalid_argument const& ex) {
-					error_message("[ERROR] Bad value for -power_accuracy_ratio using default\n");
+					error_message("Bad value for -power_accuracy_ratio using default\n");
 				}
 
 			} else if (param.rfind("-max_abs_error=", 0) == 0) {
@@ -196,7 +215,7 @@ struct cgploss : public Pass {
 				try {
         			param_max_abs_loss = std::stof(parsed);
     			} catch (std::invalid_argument const& ex) {
-					error_message("[ERROR] Bad value for -max_abs_error using default\n");
+					error_message("Bad value for -max_abs_error using default\n");
 				}
 
 			} else if (param.rfind("-representation=", 0) == 0) {
@@ -205,20 +224,20 @@ struct cgploss : public Pass {
 				if (parsed == "gates" || parsed == "mig" || parsed == "aig") {
 					param_repres = parsed;
 				} else {
-					error_message("[ERROR] Bad value for -representation using default\n");
+					error_message("Bad value for -representation using default\n");
 				}
 
 			} else if (param.rfind("-cross_parts=", 0) == 0) {
 				auto parsed = param.substr(std::string("-cross_parts=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -cross_parts using default\n");
+					error_message("Bad value for -cross_parts using default\n");
 				} else {
 					param_parrents_count = stoi(parsed);
 				}
 
 				if (param_parrents_count < 2) {
-					error_message("[ERROR] Bad value for -cross_parts, min value is 2. using 2\n");
+					error_message("Bad value for -cross_parts, min value is 2. using 2\n");
 					param_parrents_count = 2;
 				}
 
@@ -226,14 +245,14 @@ struct cgploss : public Pass {
 				auto parsed = param.substr(std::string("-l-back=").length());
 
 				if (!config::parse::is_number(parsed)) {
-					error_message("[ERROR] Bad value for -l-back using default\n");
+					error_message("Bad value for -l-back using default\n");
 				} else {
 					param_l_back = stoi(parsed);
 				}
 
 			} else {
 				if (param != "cgploss") {
-					warning_message("[WARNING] ignorig argument %s\n", param.c_str());
+					warning_message("ignorig argument %s\n", param.c_str());
 				}	
 			}
 
@@ -257,23 +276,23 @@ struct cgploss : public Pass {
 				auto error = config->parse_file(config_file_stream, map.out);
 
 				if (error) {
-					error_message("[ERROR] config file parse error on line %d - in failsafe mode using default weights\n", error);
+					error_message("config file parse error on line %d - in failsafe mode using default weights\n", error);
 				}
 
 				config_file_stream.close();
 			}
 
 			if (param_parrents_count == 2 && param_selection_count < 2) {
-				error_message("[ERROR] minimal selection_count for two parents is 2. setting to 2\n");
+				error_message("minimal selection_count for two parents is 2. setting to 2\n");
 				param_selection_count = 2;
 			}
 
 			if (param_selection_count > param_generation_size) {
-				error_message("[ERROR] generation cant be bigger that selection count. setting to selection count\n");
+				error_message("generation cant be bigger that selection count. setting to selection count\n");
 				param_generation_size = param_selection_count;
 			}
 
-			info_message("[INFO] Starting CPG with parameters:\n");
+			info_message("Starting CPG with parameters:\n");
 			info_message("       wire_test           : %d\n", wire_test);
 			info_message("       save_individuals    : %d\n", debug_indiv);
 			info_message("       ports_weights       : %s\n", config_file.c_str());
@@ -340,9 +359,9 @@ struct cgploss : public Pass {
 					//score
 					generation->selection(param_selection_count, config);
 
-					if (param_status) {
-						log("[INFO] generation %i best individual score %f\n",  generation_id, generation->individuals[0].score);
-					} else if (param_profile) {
+					info_message("generation %i best individual score %f\n",  generation_id, generation->individuals[0].score);
+					
+					if (param_profile) {
 						auto p_loss = generation->individuals[0].repres->power_loss();
 						log("%i-%f-%f;", p_loss, generation->individuals[0].score - (p_loss * param_power_accuracy_ratio), generation->individuals[0].score);
 					}
@@ -352,7 +371,7 @@ struct cgploss : public Pass {
 						auto act_duration = std::chrono::duration_cast<std::chrono::minutes>(timer_stop - timer_start);
 
 						if (act_duration.count() >= param_max_duration) {
-							info_message("[INFO] maximal duration reached\n")
+							info_message("maximal duration reached\n")
 							break;
 						}
 					}
@@ -373,7 +392,7 @@ struct cgploss : public Pass {
 			
 			genome2design(repres, design);
 		} catch( const std::invalid_argument& e ) {
-			error_message("[ERROR] Error while loading circuic. Do you run techmap befere? The circuit may be now damaged. Error: %s", e.what());
+			error_message("Error while loading circuic. Do you run techmap befere? The circuit may be now damaged. Error: %s", e.what());
 		}
 
 	}
