@@ -25,6 +25,11 @@
 
 #include "config-parse.h"
 
+//messages macros
+#define info_message(...) log("[INFO] " __VA_ARGS__)
+#define warning_message(...) log("[WARNING] " __VA_ARGS__)
+#define error_message(...) log("[ERROR] " __VA_ARGS__)
+
 USING_YOSYS_NAMESPACE
 PRIVATE_NAMESPACE_BEGIN
 
