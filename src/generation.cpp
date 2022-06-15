@@ -131,7 +131,7 @@ namespace evolution {
 			}
 
 			//Update inputs for next simulation
-			for (unsigned i = ONE_SIM_VARIANTS; i <= TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1); i++) {
+			for (unsigned i = ONE_SIM_VARIANTS; i <= TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input); i++) {
 				variant_counter[i] = (variant_counter[i] + 1) % (1 << (i - ONE_SIM_VARIANTS));
 					
 				if (variant_counter[i] == 0) {
