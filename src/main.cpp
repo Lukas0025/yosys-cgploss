@@ -363,7 +363,7 @@ struct cgploss : public Pass {
 					
 					if (param_profile) {
 						auto p_loss = generation->individuals[0].repres->power_loss();
-						log("%i-%f-%f;", p_loss, generation->individuals[0].score - (p_loss * param_power_accuracy_ratio), generation->individuals[0].score);
+						log("%i-%f-%f-%f;", p_loss, generation->individuals[0].mae, generation->individuals[0].wce, generation->individuals[0].score);
 					}
 
 					if (param_max_duration > 0) {
@@ -386,6 +386,8 @@ struct cgploss : public Pass {
 				if (debug_indiv) {
 					debug_indiv_file.close();
 				}
+
+				log("Aproximation done. Used %d transitors. MAE is %0.2f and WCE is %0.2f.", generation->individuals[0].repres->power_loss(), generation->individuals[0].mae, generation->individuals[0].wce);
 
 				delete generation;
 			}

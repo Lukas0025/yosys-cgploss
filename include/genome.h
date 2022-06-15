@@ -19,6 +19,8 @@
 #define DUMMY_GENE_TYPE 0          // if of dummy gene
 #define MAX_INPUTS 3               // maximal size of inputs array in gene 
 #define IO_ID_T_UNUSED 0xFFFFFFFF  // id of unused input
+#define TO_REAL_INPUT(IN) (IN - 2)   //convert input index in geneme to real index
+#define TO_GENOME_INPUT(IN) (IN + 2) //convert real input index to genome input index
 
 namespace genome {
 	typedef uint32_t io_id_t;
