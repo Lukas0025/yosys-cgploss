@@ -225,7 +225,7 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 	for (auto mod : design->selected_modules()) {
 
 		if (mod->processes.size() > 0) {
-			log("[WARNING] Skipping module %s because it contains processes.\n", log_id(mod));
+			warning_message("Skipping module %s because it contains processes.\n", log_id(mod));
 			continue;
 		}
 
@@ -247,7 +247,7 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 				continue;
 			}
 
-			log("[INFO] load: deleting output wire %u - %s from chromosome\n", output.first, output.second.wire->name.c_str());
+			info_message("load: deleting output wire %u - %s from chromosome\n", output.first, output.second.wire->name.c_str());
 			to_del.push_back(output.first);
 		}
 
@@ -260,7 +260,7 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 		for (auto &it : mod->wires_) {
 			RTLIL::Wire *wire = it.second;
 			if (!wire->port_output && !wire->port_input) { //is inner
-				log("[INFO] load: deleting inner wire %s\n", wire->name.c_str());
+				info_message("load: deleting inner wire %s\n", wire->name.c_str());
 				mod->wires_.erase(wire->name);
 			}
 			
@@ -271,7 +271,7 @@ mapper_t design2genome(Design* design, representation::representation *repres) {
 
 	repres->chromosome->order(mapper.in, mapper.out);
 	
-	log("[INFO] load: loaded chromosome with %u gens, %lu inputs and %lu outputs\n", repres->chromosome->size(), mapper.in.size(), mapper.out.size());
+	info_message("load: loaded chromosome with %u gens, %lu inputs and %lu outputs\n", repres->chromosome->size(), mapper.in.size(), mapper.out.size());
 
 
 	return mapper;

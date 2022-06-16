@@ -77,66 +77,85 @@ namespace evolution {
 		return (a.score < b.score);
 	}
 
-	float generation::score_individual(representation::representation *individual, config::parse *config_parse) {
+	void generation::score_individual(unsigned index, config::parse *config_parse) {
 
-		std::vector<simulation::io_t> xor_outputs(individual->chromosome->wire_out.size());
-		std::vector<simulation::io_t> test_circuic(individual->chromosome->size());
+		this->individuals[index].mae = 0;
+		this->individuals[index].wce = 0;
+		unsigned variants_count      = 1 << TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1);
+
+		std::vector<simulation::io_t> xor_outputs(this->individuals[index].repres->chromosome->wire_out.size());
+		std::vector<simulation::io_t> test_circuic(this->individuals[index].repres->chromosome->size());
 		std::vector<simulation::io_t> reference_circuic(this->reference->chromosome->size());
-		std::vector<unsigned>         variant_counter(individual->chromosome->last_input + 2);
+		std::vector<unsigned>         variant_counter(this->individuals[index].repres->chromosome->last_input + 2);
 
-		for (unsigned i = 0; i <= individual->chromosome->last_input; i++) {
-			SET_VARIANTS_BITS(test_circuic[i].vec, i);
-			SET_VARIANTS_BITS(reference_circuic[i].vec, i);
+		// set const inputs
+		SET_VECTOR_TO(test_circuic[0].vec,      VARIANTS_BITS_ALL0);
+		SET_VECTOR_TO(test_circuic[1].vec,      VARIANTS_BITS_ALL1);
+		SET_VECTOR_TO(reference_circuic[0].vec, VARIANTS_BITS_ALL0);
+		SET_VECTOR_TO(reference_circuic[1].vec, VARIANTS_BITS_ALL1);
+
+		// set varaible inputs
+		for (unsigned i = TO_GENOME_INPUT(0); i <= this->individuals[index].repres->chromosome->last_input; i++) {
+			SET_VARIANTS_BITS(test_circuic[i].vec, TO_REAL_INPUT(i));
+			SET_VARIANTS_BITS(reference_circuic[i].vec, TO_REAL_INPUT(i));
 		}
 
 		unsigned total_error = 0;
 		bool done = false;
 
-		if (ONE_SIM_VARIANTS > individual->chromosome->last_input) {
+		if (ONE_SIM_VARIANTS > TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1)) {
 			done = true;
 		}
 
 		do {
-			individual->simulate(test_circuic);
+			this->individuals[index].repres->simulate(test_circuic);
 			this->reference->simulate(reference_circuic);
 
+			//Calc error using xor
 			unsigned i = 0;
-			for (auto output: individual->chromosome->wire_out) {
+			for (auto output: this->individuals[index].repres->chromosome->wire_out) {
 				xor_outputs[i].vec = test_circuic[output.first].vec ^ reference_circuic[this->reference_inverse_wire_out[output.second]].vec;
-				total_error += simulation::bits_count(xor_outputs[i]) * config_parse->port_weight(output.second);
+				total_error += simulation::bits_count(xor_outputs[i], variants_count) * config_parse->port_weight(output.second);
 				i++;
 			}
 
-			if (simulation::one_max_loss(xor_outputs, individual->chromosome->wire_out, config_parse) > this->max_one_loss) {
-				return INFINITY;
+			//WCE
+			auto current_wce = simulation::one_max_loss(xor_outputs, this->individuals[index].repres->chromosome->wire_out, config_parse);
+			if (this->individuals[index].wce < current_wce) {
+				this->individuals[index].wce = current_wce;
+
+				if (current_wce  > this->max_one_loss) {
+					this->individuals[index].score = INFINITY;
+					return;
+				}
 			}
 
-			for (unsigned i = ONE_SIM_VARIANTS; i <= individual->chromosome->last_input; i++) {
+			//Update inputs for next simulation
+			for (unsigned i = ONE_SIM_VARIANTS; i <= TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input); i++) {
 				variant_counter[i] = (variant_counter[i] + 1) % (1 << (i - ONE_SIM_VARIANTS));
 					
 				if (variant_counter[i] == 0) {
-					test_circuic[i].vec      = ~test_circuic[i].vec;
-					reference_circuic[i].vec = ~reference_circuic[i].vec;
+					test_circuic[TO_GENOME_INPUT(i)].vec      = ~test_circuic[TO_GENOME_INPUT(i)].vec;
+					reference_circuic[TO_GENOME_INPUT(i)].vec = ~reference_circuic[TO_GENOME_INPUT(i)].vec;
 
-					if (i == individual->chromosome->last_input) {
-						if (variant_counter[individual->chromosome->last_input + 1]) {
+					if (TO_GENOME_INPUT(i) == this->individuals[index].repres->chromosome->last_input) {
+						if (variant_counter[TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1)]) {
 							done = true;
 						} 
 
-						variant_counter[individual->chromosome->last_input + 1]++;
+						variant_counter[TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1)]++;
 					}
 				}
 			}
 		} while (!done);
 
-		unsigned variants_count = 1 << (individual->chromosome->last_input + 1);
-		float    abs_error      = (float) total_error / variants_count;
+		this->individuals[index].mae = (float) total_error / variants_count;
 
-		if (abs_error > this->max_abs_loss) {
-			return INFINITY;
+		if (this->individuals[index].mae > this->max_abs_loss) {
+			this->individuals[index].score = INFINITY;
+		} else {
+			this->individuals[index].score = (1 - this->power_accuracy_ratio) * this->individuals[index].mae + this->power_accuracy_ratio * this->individuals[index].repres->power_loss();
 		}
-
-		return (1 - this->power_accuracy_ratio) * abs_error + this->power_accuracy_ratio * individual->power_loss();
 	}
 
 	void generation::selection(unsigned count, config::parse *config_parse) {
@@ -148,7 +167,7 @@ namespace evolution {
 				continue;
 			}
 
-			this->individuals[i].score = this->score_individual(this->individuals[i].repres, config_parse);
+			this->score_individual(i, config_parse);
 		}
 
 		std::sort(this->individuals.begin(), this->individuals.end(), generation::sort_individual_score_asc);
@@ -161,7 +180,7 @@ namespace evolution {
 	}
 
 	unsigned generation::add_individual(representation::representation *individual) {
-		this->individuals.push_back({individual, 0});
+		this->individuals.push_back({individual, 0, 0, 0});
 
 		return this->individuals.size() - 1;
 	}
