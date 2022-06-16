@@ -8,11 +8,16 @@
 #include "simulation.h"
 
 namespace simulation {
-	unsigned bits_count(io_t vec) {
+	unsigned bits_count(io_t vec, unsigned limit) {
 		unsigned count = 0;
 
 		for (unsigned i = 0; i < SIM_BYTES_COUNT; i++) {
 			for (unsigned j = 0; j < 8; j++) {
+
+				if (i * 8 + j >= limit) {
+					return count;
+				}
+
 				count      += vec.byte[i] &  1;
 				vec.byte[i] = vec.byte[i] >> 1;
 			}

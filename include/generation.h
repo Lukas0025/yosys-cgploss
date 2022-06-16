@@ -22,6 +22,8 @@ namespace evolution {
 	typedef struct {
 		representation::representation* repres;
 		float score;
+		float mae;
+		float wce;
 	} individual_t;
 
 	/**
@@ -105,11 +107,11 @@ namespace evolution {
 
 			/**
 			 * @brief Score individual with simulation
-			 * @param individual reprezenation of individual
+			 * @param index index of individual in generation
 			 * @param config_parse config praser with port weights
-			 * @return float score
+			 * @post set .mae .wce and .score in individual
 			 */
-			float score_individual(representation::representation *individual, config::parse *config_parse);
+			void score_individual(unsigned index, config::parse *config_parse);
 
 			/**
 			 * @brief replicate individual (copy individual to generation)
