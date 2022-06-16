@@ -29,7 +29,7 @@ namespace about {
         logger("-cross_parts=2..inf        number of crossover points for cross individuals\n");
         logger("-l-back=num                number for mutation. how many back gates can use this gate \n");
         logger("-status                    show complete generations ids and best loss\n");
-        logger("-profile                   for profile extesion print data in format {tranzistros}-{output error}-{score};\n");
+        logger("-profile                   for profile extesion print data in format {tranzistros}-{MAE}-{WCE}-{score};\n");
         logger("-max_duration=1..inf       maximal time duration of optimalization in minutes\n");
         logger("-representation={aig, gates, mig}  reprezenation of circuic for CGP\n\n");
         logger("Example ports weights file:\n");

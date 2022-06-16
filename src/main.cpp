@@ -387,7 +387,7 @@ struct cgploss : public Pass {
 					debug_indiv_file.close();
 				}
 
-				log("Aproximation done. Used %d transitors. MAE is %0.2f and WCE is %0.2f.", generation->individuals[0].repres->power_loss(), generation->individuals[0].mae, generation->individuals[0].wce);
+				log("\nAproximation done. Used %d transitors. MAE is %0.2f and WCE is %0.2f.", generation->individuals[0].repres->power_loss(), generation->individuals[0].mae, generation->individuals[0].wce);
 
 				delete generation;
 			}
