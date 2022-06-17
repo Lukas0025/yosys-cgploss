@@ -103,7 +103,7 @@ namespace evolution {
 		unsigned total_error = 0;
 		bool done = false;
 
-		if (ONE_SIM_VARIANTS > TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1)) {
+		if (ONE_SIM_VARIANTS >= TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1)) {
 			done = true;
 		}
 
