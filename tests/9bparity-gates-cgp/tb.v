@@ -24,7 +24,7 @@ module fulladder_tb;
 
       #10
 
-      exp_parity <= a[0] ^ a[1] ^ a[2] ^ a[3] ^ a[5] ^ a[6] ^ a[7] ^ a[8];  
+      exp_parity <= a[0] ^ a[1] ^ a[2] ^ a[3] ^ a[4] ^ a[5] ^ a[6] ^ a[7] ^ a[8];  
 
       #10
 
