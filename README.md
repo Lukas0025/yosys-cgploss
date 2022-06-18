@@ -100,7 +100,7 @@ make tests
 cgploss.so       build cgploss extension (default)
 multicore        build cgploss extension with multicore support
 tests            run tests
-stop-tests       run tests when fail stops
+test dir=name    start test with name
 yosys/yosys      build yosys submodule
 run              run yosys with extension
 clean            clean repo
