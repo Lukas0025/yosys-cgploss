@@ -39,7 +39,7 @@ test: cgploss.so
 	@exit $$EXIT_CODE
 
 tests:
-	$(make) test dir=*
+	make test dir=*
 	rm -f test_design
 	rm -f test_run.txt
 	rm -f test_out.v

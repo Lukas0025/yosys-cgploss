@@ -6,6 +6,7 @@
 
 
 #include "generation.h"
+#include "types.h"
 #include <random>
 #include <algorithm>
 
@@ -81,7 +82,8 @@ namespace evolution {
 
 		this->individuals[index].mae = 0;
 		this->individuals[index].wce = 0;
-		unsigned variants_count      = 1 << TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1);
+		types::Exponent variants_count(TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1));
+		unsigned        variants_count_sim  = (ONE_SIM_VARIANTS >= variants_count.exp) ? 1 <<  variants_count.exp : 1 << ONE_SIM_VARIANTS;
 
 		std::vector<simulation::io_t> xor_outputs(this->individuals[index].repres->chromosome->wire_out.size());
 		std::vector<simulation::io_t> test_circuic(this->individuals[index].repres->chromosome->size());
@@ -103,7 +105,7 @@ namespace evolution {
 		unsigned total_error = 0;
 		bool done = false;
 
-		if (ONE_SIM_VARIANTS >= TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1)) {
+		if (ONE_SIM_VARIANTS >= variants_count.exp) {
 			done = true;
 		}
 
@@ -115,7 +117,7 @@ namespace evolution {
 			unsigned i = 0;
 			for (auto output: this->individuals[index].repres->chromosome->wire_out) {
 				xor_outputs[i].vec = test_circuic[output.first].vec ^ reference_circuic[this->reference_inverse_wire_out[output.second]].vec;
-				total_error += simulation::bits_count(xor_outputs[i], variants_count) * config_parse->port_weight(output.second);
+				total_error += simulation::bits_count(xor_outputs[i], variants_count_sim) * config_parse->port_weight(output.second);
 				i++;
 			}
 
