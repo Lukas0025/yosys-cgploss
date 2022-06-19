@@ -102,7 +102,7 @@ namespace evolution {
 			SET_VARIANTS_BITS(reference_circuic[i].vec, TO_REAL_INPUT(i));
 		}
 
-		unsigned total_error = 0;
+		float total_error = 0;
 		bool done = false;
 
 		if (ONE_SIM_VARIANTS >= variants_count.exp) {
@@ -133,7 +133,7 @@ namespace evolution {
 			}
 
 			//Update inputs for next simulation
-			for (unsigned i = ONE_SIM_VARIANTS; i <= TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input); i++) {
+			for (unsigned i = ONE_SIM_VARIANTS; i < TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1); i++) {
 				variant_counter[i] = (variant_counter[i] + 1) % (1 << (i - ONE_SIM_VARIANTS));
 					
 				if (variant_counter[i] == 0) {
@@ -151,7 +151,7 @@ namespace evolution {
 			}
 		} while (!done);
 
-		this->individuals[index].mae = (float) total_error / variants_count;
+		this->individuals[index].mae = total_error / variants_count;
 
 		if (this->individuals[index].mae > this->max_abs_loss) {
 			this->individuals[index].score = INFINITY;

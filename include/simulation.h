@@ -74,8 +74,8 @@ namespace simulation {
 	 * @param xor_outputs xor between reference and individual output
 	 * @param rtl_ports  map between chromozome index and RTLIL SigBit
 	 * @param config_parse config parser with port weights
-	 * @return unsigned maximal error
+	 * @return float maximal error
 	 */
-	unsigned one_max_loss(std::vector<io_t> xor_outputs, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> rtl_ports, config::parse *config_parse);
+	float one_max_loss(std::vector<io_t> xor_outputs, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> rtl_ports, config::parse *config_parse);
 
 }
