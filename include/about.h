@@ -9,7 +9,7 @@
 namespace about {
 
     const std::string name           = "cgploss";
-    const unsigned    version        = 1;
+    const unsigned    version        = 2;
     const std::string authors        = "Lukas Plevac <xpleva07@vutbr.cz, lukas@plevac.eu>";
     const std::string build_time     = __DATE__ " " __TIME__;
     const int         optimalization = __OPTIMIZE_SIZE__;
