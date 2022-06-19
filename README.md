@@ -1,6 +1,6 @@
-# CGP Loss optimalization YOSYS extension
+# CGP Loss optimalization YOSYS extension (CGP Aproximation)
 
-use genetic algoritms for optimalize circuics with accepted error on output or without it.
+Use genetic algoritms for optimalize/aproximate circuics with accepted error on output or without it. This tool was created as a part of bachelor thesis at BUT FIT, this thesis is available at https://www.fit.vut.cz/study/thesis/22357/ .
 
 
 ## Getting Started
