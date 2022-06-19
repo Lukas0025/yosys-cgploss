@@ -20,9 +20,9 @@ namespace config {
 			/**
 			 * @brief Return weight of port
 			 * @param port SigBit of port
-			 * @return unsigned weight
+			 * @return float weight
 			 */
-			unsigned port_weight(Yosys::RTLIL::SigBit &port);
+			float port_weight(Yosys::RTLIL::SigBit &port);
 
 			/**
 			 * @brief Parse file with port weights specifications

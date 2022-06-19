@@ -1,0 +1,4 @@
+read_verilog tests/8badder-gates-cgp-aprox/code.v
+techmap
+cgploss -representation=gates -max_abs_error=50 -max_one_error=50 -generations=40 -mutations_count=100 -mutations_count_sigma=50 -power_accuracy_ratio=1
+write_verilog test_out.v

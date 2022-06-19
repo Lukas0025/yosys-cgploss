@@ -6,6 +6,7 @@
 
 
 #include "generation.h"
+#include "types.h"
 #include <random>
 #include <algorithm>
 
@@ -81,7 +82,8 @@ namespace evolution {
 
 		this->individuals[index].mae = 0;
 		this->individuals[index].wce = 0;
-		unsigned variants_count      = 1 << TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1);
+		types::Exponent variants_count(TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1));
+		unsigned        variants_count_sim  = (ONE_SIM_VARIANTS >= variants_count.exp) ? 1 <<  variants_count.exp : 1 << ONE_SIM_VARIANTS;
 
 		std::vector<simulation::io_t> xor_outputs(this->individuals[index].repres->chromosome->wire_out.size());
 		std::vector<simulation::io_t> test_circuic(this->individuals[index].repres->chromosome->size());
@@ -100,10 +102,10 @@ namespace evolution {
 			SET_VARIANTS_BITS(reference_circuic[i].vec, TO_REAL_INPUT(i));
 		}
 
-		unsigned total_error = 0;
+		float total_error = 0;
 		bool done = false;
 
-		if (ONE_SIM_VARIANTS > TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1)) {
+		if (ONE_SIM_VARIANTS >= variants_count.exp) {
 			done = true;
 		}
 
@@ -115,7 +117,7 @@ namespace evolution {
 			unsigned i = 0;
 			for (auto output: this->individuals[index].repres->chromosome->wire_out) {
 				xor_outputs[i].vec = test_circuic[output.first].vec ^ reference_circuic[this->reference_inverse_wire_out[output.second]].vec;
-				total_error += simulation::bits_count(xor_outputs[i], variants_count) * config_parse->port_weight(output.second);
+				total_error += simulation::bits_count(xor_outputs[i], variants_count_sim) * config_parse->port_weight(output.second);
 				i++;
 			}
 
@@ -131,7 +133,7 @@ namespace evolution {
 			}
 
 			//Update inputs for next simulation
-			for (unsigned i = ONE_SIM_VARIANTS; i <= TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input); i++) {
+			for (unsigned i = ONE_SIM_VARIANTS; i < TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1); i++) {
 				variant_counter[i] = (variant_counter[i] + 1) % (1 << (i - ONE_SIM_VARIANTS));
 					
 				if (variant_counter[i] == 0) {
@@ -149,7 +151,7 @@ namespace evolution {
 			}
 		} while (!done);
 
-		this->individuals[index].mae = (float) total_error / variants_count;
+		this->individuals[index].mae = total_error / variants_count;
 
 		if (this->individuals[index].mae > this->max_abs_loss) {
 			this->individuals[index].score = INFINITY;
