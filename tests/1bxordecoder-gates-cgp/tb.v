@@ -1,0 +1,29 @@
+module fulladder_tb;
+  task assert(input condition);
+    if(!condition)
+      $fatal;
+  endtask
+
+  reg  a;
+  wire [127:0] decoded;
+  
+  xordecoder UUT(
+    .a(a),
+    .out(decoded)
+  );
+  
+  initial begin
+	a    <= 0;
+
+	#10
+
+	assert(decoded === 128'b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+
+	a    <= 1;
+
+	#10
+
+	assert(decoded === 128'b01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101);
+
+  end
+endmodule
