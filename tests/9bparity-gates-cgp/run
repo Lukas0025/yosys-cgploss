@@ -1,0 +1,4 @@
+read_verilog tests/9bparity-gates-cgp/code.v
+techmap
+cgploss -representation=gates -max_abs_error=0 -max_one_error=0 -generations=20 -mutations_count=100 -mutations_count_sigma=50
+write_verilog test_out.v

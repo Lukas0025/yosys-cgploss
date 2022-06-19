@@ -7,6 +7,7 @@
 
 #include "config-parse.h"
 #include <algorithm>
+#include <math.h>
 
 namespace config {
     unsigned parse::parse_file(std::ifstream &config_file, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &rtl_ports) {
@@ -35,7 +36,7 @@ namespace config {
 		return true;
     }
 
-    unsigned parse::port_weight(Yosys::RTLIL::SigBit &port) {
+    float parse::port_weight(Yosys::RTLIL::SigBit &port) {
         if (this->ports.count(port.wire->name.str()) != 0) {
             if ((int) this->ports[port.wire->name.str()].size() > port.offset) {
 		        return this->ports[port.wire->name.str()][port.offset];
@@ -43,7 +44,7 @@ namespace config {
 	    }
 
         //default for unknew
-        return 1 << port.offset;
+        return exp2(port.offset);
     }
 
     unsigned parse::wire_bits(const std::string& name, std::map<genome::io_id_t, Yosys::RTLIL::SigBit> &rtl_ports) {

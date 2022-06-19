@@ -15,10 +15,10 @@ yosys/yosys:
 run: cgploss.so
 	yosys/yosys -m cgploss.so
 
-tests: cgploss.so
-	@echo "[info] starting implementation tests"
+test: cgploss.so
+	@echo "[info] starting implementation test $(dir)"
 	@EXIT_CODE=0
-	for f in ./tests/*; do \
+	for f in ./tests/$(dir); do \
 		if [ -d "$$f" -a $$(echo -n "$$f" | tail -c 1) != "-" -a $$(echo -n "$$f" | tail -c 4) != "unit" ]; then \
 			#echo "$$f STARTED" && \
 			yosys/yosys -m cgploss.so < "$$f/run" > test_run.txt || { echo -e "$$f \e[31mFAILED\e[0m" ; EXIT_CODE=1; continue; } && \
@@ -35,35 +35,14 @@ tests: cgploss.so
 		fi \
 	done
 	# remove tests outputs
-	rm -f test_design
-	rm -f test_run.txt
-	rm -f test_out.v
-	@echo "[info] implementation tests done"
+	@echo "[info] implementation test $(dir) done"
 	@exit $$EXIT_CODE
 
-stop-tests: cgploss.so
-	@echo "[info] starting implementation tests"
-	for f in ./tests/*; do \
-		if [ -d "$$f" -a $$(echo -n "$$f" | tail -c 1) != "-" -a $$(echo -n "$$f" | tail -c 4) != "unit" ]; then \
-			#echo "$$f STARTED" && \
-			yosys/yosys -m cgploss.so < "$$f/run" > test_run.txt || { echo -e "$$f \e[31mFAILED\e[0m" ; exit 1; } && \
-			iverilog -o test_design test_out.v "$$f/tb.v" || { echo -e "$$f \e[31mFAILED\e[0m" ; exit 1; } && \
-			vvp test_design || { echo -e "$$f \e[31mFAILED\e[0m" ; exit 1; } && \
-			echo -e "$$f \e[32mPASS\e[0m"; \
-		elif [ -d "$$f" -a $$(echo -n "$$f" | tail -c 1) != "-" -a $$(echo -n "$$f" | tail -c 4) == "unit" ]; then \
-			#echo "$$f STARTED UNIT TEST" && \
-			cp $$f/test.cpp src/test.cpp  && \
-			yosys/yosys-config --exec --cxx --cxxflags --ldflags -o cgplossUnit.so -shared $(TEST_SRC) -I yosys/ -I include/ --ldlibs > test_run.txt 2>&1 || { echo -e "$$f \e[31mFAILED\e[0m" ; exit 1; } && \
-			rm -f src/test.cpp && \
-			yosys/yosys -m cgplossUnit.so < "$$f/run" >> test_run.txt || { echo -e "$$f \e[31mFAILED\e[0m" ; exit 1; } && \
-			echo -e "$$f \e[32mPASS\e[0m"; \
-		fi \
-	done
-	# remove tests outputs
+tests:
+	make test dir=*
 	rm -f test_design
 	rm -f test_run.txt
 	rm -f test_out.v
-	@echo "[info] implementation tests done"
 
 clean:
 	rm -f cgploss.so
