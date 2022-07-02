@@ -18,25 +18,35 @@ yosys -m cgploss.so
 cgploss [options]
 
 options:
-	-wire-test                 test load and save part, do not use CGP only load and save [DEBUG]
-	-save_individuals=file     create debug file with all individuals [DEBUG]
-	-ports_weights=file        ports weights file
-	-selection_size=size       size of selected individuals on end of generation
-	-generation_size=size      number of individuals in generation
-	-max_one_error=0..inf      maximal accepted error of circuic (one combination)
-	-generations=count         count of generations
-	-mutations_count=count     number of mutation for center of normal distribution
-	-mutations_count_sigma=num sigma for normal distribution
-	-parents=1..2              number of parents for kid
-	-power_accuracy_ratio=0..1 float number for loss (1 - power_accuracy_ratio) * abs_error + power_accuracy_ratio * power_loss
-	-max_abs_error=num         maximal accepted abs error of circuic (all combinations)
-	-cross_parts=2..inf        number of crossover points for cross individuals
-	-l-back                    number for mutation. how many back gates can use this gate 
-	-status                    show complete generations ids and best loss
-	-profile                   for profile extesion print data in format {tranzistros}-{MAE}-{WCE}-{score};
-	-max_duration=1..inf       maximal time duration of optimalization in minutes 
+	# Basic
+	-representation={aig, gates, mig}               reprezenation of circuic for CGP
+	-max_one_error=num,         -wce=num            maximal accepted error of circuic (one combination) (worst case error) (0 is default)
+	-max_abs_error=num,         -mae=num            maximal accepted abs error of circuic (all combinations) (mean average error) (0 is default)
+	-generations=num,           -gcount=num         count of generations (0 is unlimited) (0 is default)
+	-power_accuracy_ratio=0..1, -par=0..1           float number for loss (1 - power_accuracy_ratio) * MAE + power_accuracy_ratio * power_loss (1 is default)
+	-max_duration=num,          -timeout=num        maximal time duration of optimalization in minutes (0 is unlimited) (0 is default)
+	-ports_weights=file,        -ports=file         ports weights file (weights of outputs, if not presented used 2**(port bit offset))
+	
+	# Evolution settings
+	-selection_size=num,        -ssize=num          size of selected individuals on end of generation
+	-generation_size=size,      -gsize=num          number of individuals in generation
 
-	-representation={aig, gates, mig}  reprezenation of circuic for CGP
+	# Mutations settings
+	-mutations_count=num                            number of mutation for center of normal distribution
+	-mutations_count_sigma=num                      sigma for normal distribution
+	-l-back=num                                     number for mutation. how many back gates can use this gate (0 is unlimited)
+	
+	# Cross settings
+	-parents=1..2                                   number of parents for kid
+	-cross_parts=2..inf                             number of crossover points for cross individuals
+	
+	# Status commnads
+	-status                                         show complete generations ids and best loss
+	-profile                                        for profile extesion print data in format {tranzistros}-{MAE}-{WCE}-{score};
+
+	# Debug
+	-wire-test                                      test load and save part, do not use CGP only load and save [DEBUG]
+	-save_individuals                               create debug file with all individuals [DEBUG]
 ```
 
 #### example run
