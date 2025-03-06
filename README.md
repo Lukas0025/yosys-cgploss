@@ -19,7 +19,9 @@ cgploss [options]
 
 options:
 	-wire-test                 test load and save part, do not use CGP only load and save [DEBUG]
-	-save_individuals=file     create debug file with all individuals [DEBUG]
+	-save_individuals          create debug file with all individuals (debug.json) [DEBUG]
+	-save_final=file           save final chromosome to file
+	-load_init=file            load inital chromosome from file
 	-ports_weights=file        ports weights file
 	-selection_size=size       size of selected individuals on end of generation
 	-generation_size=size      number of individuals in generation
@@ -84,6 +86,10 @@ need packages `build-essential clang`
 make
 # or multicore with package 𝑙𝑖𝑏𝑜𝑚𝑝−𝑑𝑒𝑣
 make multicore
+# if you want to use realMig backend use
+make realMig
+# or multicore
+make realMigMulticore
 ```
 
 ## Running tests

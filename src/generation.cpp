@@ -164,10 +164,13 @@ namespace evolution {
 
 		#pragma omp parallel for
 		for (unsigned i = 0; i < this->individuals.size(); i++) {
-			if (!this->individuals[i].repres->chromosome->valid()) {
-				this->individuals[i].score = INFINITY;
-				continue;
-			}
+
+			#ifndef PERFORMANCE
+				if (!this->individuals[i].repres->chromosome->valid()) {
+					this->individuals[i].score = INFINITY;
+					continue;
+				}
+			#endif
 
 			this->score_individual(i, config_parse);
 		}

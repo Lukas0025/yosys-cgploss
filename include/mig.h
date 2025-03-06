@@ -111,6 +111,10 @@ namespace representation {
 			 * @return unsigned number of trazsitors
 			 */
             static unsigned gate_power(genome::gene_t gene) {
+				#ifdef REAL_MIG_BACKEND
+					return 1;
+				#endif
+
 				if (gene.Inputs[0] == 0) return mig_and_or_gate_costs[NO_PORT_0_TYPE(gene.type)];
 				if (gene.Inputs[1] == 0) return mig_and_or_gate_costs[NO_PORT_1_TYPE(gene.type)];
 				if (gene.Inputs[2] == 0) return mig_and_or_gate_costs[NO_PORT_2_TYPE(gene.type)];

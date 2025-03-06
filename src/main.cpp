@@ -50,6 +50,7 @@ PRIVATE_NAMESPACE_BEGIN
 bool wire_test;
 bool debug_indiv;
 bool param_profile;
+bool save_final_indiv;
 unsigned param_selection_count;
 unsigned param_generation_size;
 unsigned param_max_one_loss;
@@ -81,6 +82,7 @@ struct cgploss : public Pass {
 
 		wire_test                  = false;
 		debug_indiv                = false;
+		save_final_indiv           = false;
 		param_profile              = false;
 		param_selection_count      = 50;
 		param_generation_size      = 500;
@@ -96,6 +98,8 @@ struct cgploss : public Pass {
 		param_status               = false;
 		param_max_duration         = 0;
 		std::string config_file    = "";
+		std::string final_file     = "";
+		std::string inital_file    = "";
 		std::string param_repres   = "aig";
 
 		for (auto param : params) {
@@ -104,6 +108,11 @@ struct cgploss : public Pass {
 				wire_test = true;
 			} else if (param == "-save_individuals") {
 				debug_indiv = true;
+			} else if (param.rfind("-save_final=", 0) == 0) {
+				save_final_indiv = true;
+				final_file = param.substr(std::string("-save_final=").length());
+			} else if (param.rfind("-load_init=", 0) == 0) {
+				inital_file = param.substr(std::string("-load_init=").length());
 			} else if (param == "-status") {
 				param_status = true;
 			} else if (param == "-profile") {
@@ -382,6 +391,12 @@ struct cgploss : public Pass {
 
 				debug_indiv_to_file(debug_indiv_file, repres);
 
+				if (save_final_indiv) {
+					std::ofstream final_indiv_file;
+					final_indiv_file.open(final_file);
+					repres->save(final_indiv_file);
+					final_indiv_file.close();
+				}
 
 				if (debug_indiv) {
 					debug_indiv_file.close();

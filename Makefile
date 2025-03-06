@@ -1,13 +1,19 @@
 .ONESHELL:
-.PHONY: clean run tests debugtests
+.PHONY: clean run tests debugtests realMig
 
 TEST_SRC = src/aig-sim.cpp src/aig-rtlil.cpp src/test.cpp src/genome.cpp src/aig-genome.cpp src/generation.cpp src/config-parse.cpp
 
+realMig: yosys/yosys
+	yosys/yosys-config --exec --cxx --cxxflags --ldflags -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs -D REAL_MIG_BACKEND -D PERFORMANCE -O3
+
+realMigMulticore: yosys/yosys
+	yosys/yosys-config --exec --cxx --cxxflags --ldflags -fopenmp -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs -D REAL_MIG_BACKEND -D PERFORMANCE -O3
+
 cgploss.so: yosys/yosys
-	yosys/yosys-config --exec --cxx --cxxflags --ldflags -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs
+	yosys/yosys-config --exec --cxx --cxxflags --ldflags -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs -D PERFORMANCE -O3
 
 multicore: yosys/yosys
-	yosys/yosys-config --exec --cxx --cxxflags --ldflags -fopenmp -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs
+	yosys/yosys-config --exec --cxx --cxxflags --ldflags -fopenmp -o cgploss.so -shared src/* -I yosys/ -I include/ --ldlibs -D PERFORMANCE -O3
 
 yosys/yosys:
 	cd yosys && make
