@@ -20,6 +20,7 @@ cgploss [options]
 options:
 	-wire-test                 test load and save part, do not use CGP only load and save [DEBUG]
 	-save_individuals          create debug file with all individuals (debug.json) [DEBUG]
+	-keep_delay                Keep delay of circuic do not make it worse
 	-save_final=file           save final chromosome to file
 	-load_init=file            load inital chromosome from file
 	-ports_weights=file        ports weights file

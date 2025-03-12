@@ -235,6 +235,34 @@ namespace genome {
 		return cost;
 	}
 
+	int genome::delay() {
+		std::stack<std::pair<io_id_t, int>> stack;
+
+		int longest = 0;
+
+		for (auto output: this->wire_out) {
+			stack.push(std::make_pair(output.first, 0));
+		}
+
+		while (!stack.empty()) {
+			auto gene_id = stack.top();
+			stack.pop();
+
+			if (gene_id.first > this->last_input) {
+				auto gene = this->get_gene_ptr(gene_id.first);
+					
+				for (unsigned i = 0; i < this->gene_inputs_count; i++) {
+					stack.push(std::make_pair(gene->Inputs[i], gene_id.second + 1));
+				}
+
+			} else {
+				longest = std::max(longest, gene_id.second);
+			}
+		}
+
+		return longest;
+	}
+
 	void genome::cut_unused() {
 		std::stack<io_id_t> stack;
 		std::vector<bool>   used(this->chromosome.size());

@@ -38,11 +38,12 @@ namespace evolution {
 			 * @param max_abs_loss maximal allowed error mean combination
 			 * @param power_accuracy_ratio ratio between accurancy and ratio (0..1) 0 means only accurancy only and 1 means only power optimalization
 			 */
-			generation(representation::representation *reference, unsigned max_one_loss, float max_abs_loss, float power_accuracy_ratio) {
+			generation(representation::representation *reference, unsigned max_one_loss, float max_abs_loss, float power_accuracy_ratio, int max_delay) {
 				this->power_accuracy_ratio = power_accuracy_ratio;
 				this->reference            = reference;
 				this->max_one_loss         = max_one_loss;
 				this->max_abs_loss         = max_abs_loss;
+				this->max_delay            = max_delay;
 
 				for (auto output: reference->chromosome->wire_out) {
 					reference_inverse_wire_out[output.second] = output.first;
@@ -132,6 +133,7 @@ namespace evolution {
 			representation::representation *reference;
 			unsigned generation_size;
 			unsigned max_one_loss;
+			int      max_delay;
 			float    max_abs_loss;
 			float    power_accuracy_ratio;
 	};

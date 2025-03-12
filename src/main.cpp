@@ -97,6 +97,7 @@ struct cgploss : public Pass {
 		param_l_back               = 0;
 		param_status               = false;
 		param_max_duration         = 0;
+		bool keep_delay            = false;
 		std::string config_file    = "";
 		std::string final_file     = "";
 		std::string inital_file    = "";
@@ -108,6 +109,8 @@ struct cgploss : public Pass {
 				wire_test = true;
 			} else if (param == "-save_individuals") {
 				debug_indiv = true;
+			} else if (param == "-keep_delay") {
+				keep_delay = true;
 			} else if (param.rfind("-save_final=", 0) == 0) {
 				save_final_indiv = true;
 				final_file = param.substr(std::string("-save_final=").length());
@@ -316,7 +319,10 @@ struct cgploss : public Pass {
 			info_message("       cross_parts         : %d\n", param_cross_parts);
 			info_message("       power_accuracy_ratio: %f\n", param_power_accuracy_ratio);
 			info_message("       representation      : %s\n", param_repres.c_str());
+			info_message("       keep_delay          : %d\n", keep_delay);
 			info_message("       l-back              : %d\n\n", param_l_back);
+
+			int inital_delay = repres->chromosome->delay();
 
 			if (!wire_test) {
 				std::ofstream debug_indiv_file;
@@ -327,7 +333,7 @@ struct cgploss : public Pass {
 
 				debug_indiv_to_file(debug_indiv_file, repres);
 
-				auto generation  = new evolution::generation(repres, param_max_one_loss, param_max_abs_loss, param_power_accuracy_ratio);
+				auto generation  = new evolution::generation(repres, param_max_one_loss, param_max_abs_loss, param_power_accuracy_ratio, keep_delay ? inital_delay : -1);
 				auto parrent0    = generation->add_individual(repres->clone());
 				auto timer_start = std::chrono::high_resolution_clock::now();
 
@@ -402,7 +408,7 @@ struct cgploss : public Pass {
 					debug_indiv_file.close();
 				}
 
-				log("\nAproximation done. Used %d transitors. MAE is %0.2f and WCE is %0.2f.", generation->individuals[0].repres->power_loss(), generation->individuals[0].mae, generation->individuals[0].wce);
+				log("\nAproximation done. Used %d transitors. MAE is %0.2f and WCE is %0.2f. Delay is %d delta", generation->individuals[0].repres->power_loss(), generation->individuals[0].mae, generation->individuals[0].wce,  generation->individuals[0].repres->chromosome->delay());
 
 				delete generation;
 			}

@@ -119,6 +119,12 @@ namespace genome {
 			unsigned used_cost(unsigned (*gate_power)(gene_t));
 
 			/**
+			 * @brief Get delay of circuic in representation
+			 * @return int length of logest path in graph
+			 */
+			int delay();
+
+			/**
 			 * @brief Remove unused genes
 			 */
 			void cut_unused();                                           

@@ -132,6 +132,15 @@ namespace evolution {
 				}
 			}
 
+			//DELAY
+			if (this->max_delay > -1) {
+				auto current_delay = this->individuals[index].repres->chromosome->delay();
+				if (current_delay > this->max_delay) {
+					this->individuals[index].score = INFINITY;
+					return;
+				}
+			}
+
 			//Update inputs for next simulation
 			for (unsigned i = ONE_SIM_VARIANTS; i < TO_REAL_INPUT(this->individuals[index].repres->chromosome->last_input + 1); i++) {
 				variant_counter[i] = (variant_counter[i] + 1) % (1 << (i - ONE_SIM_VARIANTS));

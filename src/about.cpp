@@ -16,6 +16,7 @@ namespace about {
         logger("Options:\n");
         logger("-wire-test                 test load and save part, do not use CGP only load and save [DEBUG]\n");
         logger("-save_individuals=file     create debug file with all individuals [DEBUG]\n");
+        logger("-keep_delay                Keep delay of circuic do not make it worse");
         logger("-ports_weights=file        ports weights file\n");
         logger("-selection_size=size       size of selected individuals on end of generation\n");
         logger("-generation_size=size      number of individuals in generation\n");
