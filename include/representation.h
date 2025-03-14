@@ -139,6 +139,28 @@ namespace representation {
 				file_str.pop_back();
 
 				file_str += "],\n";
+
+				file_str += "\n\t\"inputs_names\": [";
+					
+				for (auto input = this->chromosome->wire_in.begin(); input != this->chromosome->wire_in.end(); input++) {
+					file_str = file_str + "\"\\" + input->second.wire->name.c_str() + "\",";					
+				}
+
+				file_str.pop_back();
+
+				file_str += "],\n";
+
+				file_str += "\n\t\"output_names\": [";
+					
+				for (auto out = this->chromosome->wire_out.begin(); out != this->chromosome->wire_out.end(); out++) {
+					file_str = file_str + "\"\\" + out->second.wire->name.c_str() + "\",";					
+				}
+
+				file_str.pop_back();
+
+				file_str += "],\n";
+
+
 				file_str += this->chromosome->to_string();
 				file_str += "\n}";
 
