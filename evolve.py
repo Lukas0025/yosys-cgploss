@@ -1,26 +1,38 @@
 import os
 import json
+from joblib import Parallel, delayed
 
 RUNS = 30
 GENS = 100000
 Files = ["claBlock1.v", "claBlock2.v", "claBlock3.v", "claBlock4.v"]
-outFinalFIle = "evo_"
+outFinalFIle = "evo"
 
-for inFile in Files:
-    BEST_SIZE = None
-    for run in range(RUNS):
-        outFIle = outFinalFIle + ".tmp" 
-        os.system("yosys/yosys -m cgploss.so -p \"read_verilog {}; techmap; cgploss -representation=mig -power_accuracy_ratio=1 -max_abs_error=0 -max_one_error=0 -generations={} -save_final={} -keep_delay\"".format(inFile, GENS, outFIle))
+def process(job):
+    inFile = job[0]
+    
+    outFIle = "{}_{}_{}.json".format(outFinalFIle, job[0], job[1])
+    os.system("yosys/yosys -m cgploss.so -p \"read_verilog {}; techmap; cgploss -representation=mig -power_accuracy_ratio=1 -max_abs_error=0 -max_one_error=0 -generations={} -save_final={} -keep_delay\"".format(inFile, GENS, outFIle))
 
-        chrom = None
-        with open(outFIle) as f:
-            chrom = json.load(f)
+    chrom = None
+    with open(outFIle) as f:
+        chrom = json.load(f)
 
-        if BEST_SIZE is None or len(chrom["chromosome"]) < BEST_SIZE:
-            os.system("mv {} {}_{}.json".format(outFIle, outFinalFIle, inFile))
-            BEST_SIZE = len(chrom["chromosome"])
+    return (len(chrom["chromosome"]), outFIle, inFile)
 
-    print()
-    print("Done bets ind is from {} GATES".format(BEST_SIZE))
+jobs = [(file, runI) for file in Files for runI in range(RUNS)]
 
+results = Parallel(n_jobs=70)(delayed(process)(job) for job in jobs)
 
+best = {}
+bestName = {}
+for result in results:
+    if result[2] not in best or best[result[2]] > result[1]:
+        best[result[2]] = result[1]
+        bestName[result[2]] = result[0]
+
+for i, val in enumerate(best):
+    print("For {} is best {} gates".format(i, val))
+    os.system("mv {} {}_{}.json", bestName[i], outFinalFIle, i)
+
+for result in results:
+    os.system("rm -f {}", result[0])
