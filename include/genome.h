@@ -120,9 +120,10 @@ namespace genome {
 
 			/**
 			 * @brief Get delay of circuic in representation
+			 * @param gate_delay function to calculate delay of one gene
 			 * @return int length of logest path in graph
 			 */
-			int delay();
+			unsigned delay(unsigned (*gate_delay)(gene_t));
 
 			/**
 			 * @brief Remove unused genes

@@ -134,7 +134,7 @@ namespace evolution {
 
 			//DELAY
 			if (this->max_delay > -1) {
-				auto current_delay = this->individuals[index].repres->chromosome->delay();
+				auto current_delay = this->individuals[index].repres->delay();
 				if (current_delay > this->max_delay) {
 					this->individuals[index].score = INFINITY;
 					return;

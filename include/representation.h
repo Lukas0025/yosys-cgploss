@@ -67,6 +67,12 @@ namespace representation {
 			virtual unsigned power_loss() = 0;
 
 			/**
+			 * @brief Calculate delay of circuic
+			 * @return unsigned delay in delta
+			 */
+			virtual unsigned delay() = 0;
+
+			/**
 			 * @brief Perform muatatin operation over chromozome
 			 * @param center center of random number of mutations
 			 * @param sigma sigma of normal distribution of number of mutations

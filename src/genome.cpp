@@ -7,6 +7,8 @@
 #include "genome.h"
 #include <random>
 
+#define MAX_DEPTH 1000
+
 namespace genome {
 	genome::genome() {
 		this->chromosome.clear();
@@ -235,10 +237,10 @@ namespace genome {
 		return cost;
 	}
 
-	int genome::delay() {
-		std::stack<std::pair<io_id_t, int>> stack;
+	unsigned genome::delay(unsigned (*gate_delay)(gene_t)) {
+		std::stack<std::pair<io_id_t, unsigned>> stack;
 
-		int longest = 0;
+		unsigned longest = 0;
 
 		for (auto output: this->wire_out) {
 			stack.push(std::make_pair(output.first, 0));
@@ -248,11 +250,15 @@ namespace genome {
 			auto gene_id = stack.top();
 			stack.pop();
 
+			if (gene_id.second > MAX_DEPTH) {
+				return UINT_MAX;
+			}
+
 			if (gene_id.first > this->last_input) {
 				auto gene = this->get_gene_ptr(gene_id.first);
 					
 				for (unsigned i = 0; i < this->gene_inputs_count; i++) {
-					stack.push(std::make_pair(gene->Inputs[i], gene_id.second + 1));
+					stack.push(std::make_pair(gene->Inputs[i], gene_id.second + gate_delay(*gene)));
 				}
 
 			} else {

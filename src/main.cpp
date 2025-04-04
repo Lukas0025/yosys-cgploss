@@ -322,7 +322,7 @@ struct cgploss : public Pass {
 			info_message("       keep_delay          : %d\n", keep_delay);
 			info_message("       l-back              : %d\n\n", param_l_back);
 
-			int inital_delay = repres->chromosome->delay();
+			int inital_delay = repres->delay();
 
 			if (!wire_test) {
 				std::ofstream debug_indiv_file;
@@ -408,7 +408,7 @@ struct cgploss : public Pass {
 					debug_indiv_file.close();
 				}
 
-				log("\nAproximation done. Used %d transitors. MAE is %0.2f and WCE is %0.2f. Delay is %d delta", generation->individuals[0].repres->power_loss(), generation->individuals[0].mae, generation->individuals[0].wce,  generation->individuals[0].repres->chromosome->delay());
+				log("\nAproximation done. Used %d transitors. MAE is %0.2f and WCE is %0.2f. Delay is %d delta", generation->individuals[0].repres->power_loss(), generation->individuals[0].mae, generation->individuals[0].wce,  generation->individuals[0].repres->delay());
 
 				delete generation;
 			}

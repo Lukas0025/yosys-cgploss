@@ -78,6 +78,14 @@ namespace representation {
 			}
 
 			/**
+			 * @brief Calculate delay of circuic
+			 * @return unsigned delay
+			 */
+			unsigned delay() {
+				return this->chromosome->delay(aig::gate_power);
+			}
+
+			/**
 			 * @brief get number of tranzistors of gate tyte
 			 * @param gene gene of gate reprezentation
 			 * @return unsigned number of trazsitors
