@@ -4,7 +4,7 @@ from joblib import Parallel, delayed
 
 RUNS = 30
 GENS = 100000
-Files = ["claBlock1.v", "claBlock2.v", "claBlock3.v", "claBlock4.v"]
+Files = ["claBlock2Full.v", "claBlock3Full.v", "claBlock4Full.v"]
 outFinalFIle = "evo"
 
 def process(job):
